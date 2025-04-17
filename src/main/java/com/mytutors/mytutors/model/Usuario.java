@@ -22,6 +22,11 @@ public class Usuario {
     @JoinColumn(name="id_carrera")
     private Carrera carrera;
 
+    private String rolEnApp;
+
+    @Column(name="ruta_foto")
+    private String rutaFoto;
+
 
     //getters y setters
 
@@ -79,5 +84,16 @@ public class Usuario {
 
     public void setTipoUsuario(String tipoUsuario) {
         this.tipoUsuario = tipoUsuario;
+    }
+
+    public String getRolEnApp() { return rolEnApp; }
+    public void setRolEnApp(String rolEnApp) { this.rolEnApp = rolEnApp; }
+
+    public String getRutaFoto() {
+        return rutaFoto;
+    }
+
+    public void setRutaFoto(String rutaFoto) {
+        this.rutaFoto = rutaFoto;
     }
 }

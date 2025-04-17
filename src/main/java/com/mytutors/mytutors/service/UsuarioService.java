@@ -7,6 +7,7 @@ import com.mytutors.mytutors.model.Usuario;
 import com.mytutors.mytutors.repository.UsuarioRepository;
 import com.mytutors.mytutors.model.Carrera;
 import com.mytutors.mytutors.repository.CarreraRepository;
+import java.util.List;
 
 @Service
 public class UsuarioService {
@@ -36,6 +37,16 @@ public class UsuarioService {
     public Usuario buscarPorCorreo(String correo)
     {
         return repo.findByCorreo(correo);
+    }
+
+    public boolean existeCorreo(String correo)
+    {
+        return repo.existsByCorreo(correo);
+    }
+
+    public List<Usuario> buscarPorRolEnApp(String rolEnApp)
+    {
+        return repo.findByRolEnApp(rolEnApp);
     }
 
 }

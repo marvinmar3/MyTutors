@@ -1,0 +1,54 @@
+body{
+    margin:0;
+    padding: 0;
+    background-color: #d0eaff;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.header{
+    background-color: #007acc;
+    color: white;
+    padding: 2rem 1rem;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.tarjeta-usuario {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 1rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    text-align: center;
+    width: 280px;
+}
+
+.usuarios-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.foto-perfil {
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+}
+
+.btn-ver {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #0d6efd;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-ver:hover {
+    background-color: #094db1;
+}
