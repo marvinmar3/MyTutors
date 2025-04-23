@@ -20,38 +20,8 @@ public class LoginController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @PostMapping("/login")
-    public String procesarLogin(@RequestParam("correo") String correo,
-                                @RequestParam("password") String password,
-                                HttpSession session,
-                                Model model) {
-
-        //validacion manual del correo
-        if(!correo.endsWith("@estudiantes.uv.mx"))
-        {
-            model.addAttribute("error", "Correo no válido.");
-            return "login";
-        }
-
-
-        Usuario usuario = usuarioService.buscarPorCorreo(correo);
-
-        //validacion de usuario y contraseña
-        if (usuario != null && passwordEncoder.matches(password, usuario.getPassword())) {
-            session.setAttribute("usuario", usuario);
-            model.addAttribute("nombreUsuario", usuario.getNombre());
-            model.addAttribute("tipoUsuario", usuario.getTipoUsuario());
-            return "redirect:/home";
-        } else {
-            model.addAttribute("error", "Correo o contraseña incorrectos");
-            return "login"; // login.jsp
-        }
-    }
-
     @GetMapping("/login")
-    public String mostrarLogin(Model model) {
-        model.addAttribute("usuario", new Usuario());
+    public String mostrarLogin() {
         return "login"; // login.jsp
     }
-
 }

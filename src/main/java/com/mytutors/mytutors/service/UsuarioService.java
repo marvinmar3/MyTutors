@@ -2,6 +2,7 @@ package com.mytutors.mytutors.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.mytutors.mytutors.model.Usuario;
 import com.mytutors.mytutors.repository.UsuarioRepository;
@@ -13,18 +14,19 @@ import java.util.List;
 public class UsuarioService {
     private final UsuarioRepository repo;
     private final CarreraRepository carreraRepo;
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UsuarioService(UsuarioRepository repo, CarreraRepository carreraRepo)
+    public UsuarioService(UsuarioRepository repo, CarreraRepository carreraRepo, PasswordEncoder passwordEncoder)
     {
         this.repo = repo;
         this.carreraRepo = carreraRepo;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void registrar(Usuario u, Long idCarrera)
     {
-        u.setPassword(encoder.encode(u.getPassword()));
+        u.setPassword(passwordEncoder.encode(u.getPassword()));
         Carrera carrera = carreraRepo.findById(idCarrera).orElse(null);
         u.setCarrera(carrera);
         if (carrera != null) {
@@ -36,7 +38,7 @@ public class UsuarioService {
 
     public Usuario buscarPorCorreo(String correo)
     {
-        return repo.findByCorreo(correo);
+        return repo.findByCorreo(correo).orElse(null);
     }
 
     public boolean existeCorreo(String correo)

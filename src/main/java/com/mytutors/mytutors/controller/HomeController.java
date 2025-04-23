@@ -38,9 +38,15 @@ public class HomeController {
         return "home";
     }*/
     @GetMapping("/home")
-    public String home(Model model){
+    public String home(Model model, Principal principal) {
+        String correo = principal.getName();
+        Usuario usuario=usuarioService.buscarPorCorreo(correo);
+
+        model.addAttribute("usuario", usuario);
+        model.addAttribute("nombreUsuario", usuario.getNombre());
+        model.addAttribute("temas", temaService.obtenerTemas());
+
         List<Tema> temas = temaService.obtenerTemas();
-        model.addAttribute("temas", temas);
         return "home";
     }
 

@@ -56,6 +56,8 @@
 			<optional>true</optional>
 		</dependency>
 
+
+
 		<!-- JSP (jakarta compatible) -->
 		<dependency>
 			<groupId>jakarta.servlet.jsp</groupId>
@@ -112,6 +114,10 @@
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-taglibs</artifactId>
 		</dependency>
 
 	</dependencies>
