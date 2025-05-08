@@ -6,7 +6,6 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head>
@@ -31,7 +30,7 @@
 </header>
 
 <!-- Sidebar oculto -->
-<sec:authorize access="isAuthenticated()">
+<c:if test="${not empty sessionScope.usuario}">
     <div class="sidebar" id="sidebar">
         <div class="sidebar-user">
             <c:choose>
@@ -52,7 +51,7 @@
             <a href="${pageContext.request.contextPath}/logout" class="logout">Cerrar sesión</a>
         </nav>
     </div>
-</sec:authorize>
+</c:if>
 
 <!-- Tarjetas de temas -->
 <main class="usuarios-container">
@@ -79,6 +78,73 @@
         </div>
     </c:forEach>
 </main>
+
+<!-- Ícono flotante -->
+<div id="chat-icon" onclick="toggleChatWindow()">
+    💬
+</div>
+
+<!-- Ventana de chat -->
+<div id="chat-window" class="hidden">
+    <div class="chat-header">
+        <span>Mensajes</span>
+        <button onclick="toggleChatWindow()">✖</button>
+    </div>
+    <div class="chat-body" id="chat-mensajes">
+        <!-- Aquí se renderizan los mensajes -->
+    </div>
+    <div class="chat-input">
+        <input type="text" id="mensajeInput" placeholder="Escribe un mensaje..." onkeypress="enviarSiEnter(event)">
+        <button onclick="enviarMensaje()">Enviar</button>
+    </div>
+</div>
+<script>
+    function toggleChatWindow() {
+        const ventana = document.getElementById("chat-window");
+        ventana.classList.toggle("hidden");
+    }
+
+    function enviarSiEnter(e) {
+        if (e.key === "Enter") {
+            enviarMensaje();
+        }
+    }
+    const remitente = "${usuario.nombre}";
+    function enviarMensaje() {
+        const input = document.getElementById("mensajeInput");
+        const mensaje = input.value.trim();
+        if (mensaje !== "") {
+            // Aquí se envía al WebSocket
+            stompClient.send("/app/chat", {}, JSON.stringify({ contenido: mensaje }));
+            input.value = "";
+        }
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script>
+    let stompClient = null;
+
+    function conectar() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            stompClient.subscribe('/topic/mensajes', function (mensaje) {
+                mostrarMensaje(JSON.parse(mensaje.body));
+            });
+        });
+    }
+
+    function mostrarMensaje(mensaje) {
+        const chat = document.getElementById("chat-mensajes");
+        const div = document.createElement("div");
+        div.innerText = mensaje.remitente + ": " + mensaje.contenido;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    window.addEventListener("load", conectar);
+</script>
 
 </body>
 </html>

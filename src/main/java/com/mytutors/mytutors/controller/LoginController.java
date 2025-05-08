@@ -17,11 +17,40 @@ public class LoginController {
 
     @Autowired
     private UsuarioService usuarioService;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    //muestra el formlulario del login
     @GetMapping("/login")
-    public String mostrarLogin() {
+    public String mostrarLogin(@RequestParam(value="error", required=false) String error, Model model) {
+        if (error != null) {
+            model.addAttribute("error", "Correo o contraseña incorrectos");
+        }
         return "login"; // login.jsp
+    }
+
+    //procesa el login
+    @PostMapping("/login")
+    public String procesarLogin(@RequestParam("correo") String correo,
+                                @RequestParam("password") String password,
+                                HttpSession session, Model model) {
+        Usuario usuario = usuarioService.buscarPorCorreo(correo);
+
+        if (usuario != null && passwordEncoder.matches(password, usuario.getPassword())) {
+            session.setAttribute("usuario", usuario);
+            session.setAttribute("nombreUsuario", usuario.getNombre());
+            return "redirect:/home";
+        }else
+        {
+            model.addAttribute("error", "Correo o contraseña incorrectos.");
+            return "login";
+        }
+    }
+
+    //ccerrar sesion
+    @GetMapping("/logout")
+    public String cerreSesion(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login?logout";
     }
 }

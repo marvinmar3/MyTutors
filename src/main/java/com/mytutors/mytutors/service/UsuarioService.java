@@ -1,8 +1,8 @@
 package com.mytutors.mytutors.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.mytutors.mytutors.model.Usuario;
 import com.mytutors.mytutors.repository.UsuarioRepository;
@@ -14,14 +14,13 @@ import java.util.List;
 public class UsuarioService {
     private final UsuarioRepository repo;
     private final CarreraRepository carreraRepo;
-    private final PasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    @Autowired
-    public UsuarioService(UsuarioRepository repo, CarreraRepository carreraRepo, PasswordEncoder passwordEncoder)
+    public UsuarioService(UsuarioRepository repo, CarreraRepository carreraRepo)
     {
         this.repo = repo;
         this.carreraRepo = carreraRepo;
-        this.passwordEncoder = passwordEncoder;
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     public void registrar(Usuario u, Long idCarrera)
