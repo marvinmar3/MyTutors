@@ -37,7 +37,7 @@
         <div class="sidebar-user">
             <c:choose>
                 <c:when test="${not empty usuario.rutaFoto}">
-                    <img class="perfil-imagen" src="${pageContext.request.contextPath}/img/usuarios/${usuario.rutaFoto}" alt="Perfil">
+                    <img class="perfil-imagen" src="${pageContext.request.contextPath}${usuario.rutaFoto}" alt="Perfil">
                 </c:when>
                 <c:otherwise>
                     <img class="perfil-imagen" src="${pageContext.request.contextPath}/img/default-user.jpeg" alt="Perfil">
@@ -64,7 +64,7 @@
         <div class="tarjeta-usuario">
             <c:choose>
                 <c:when test="${not empty tema.tutor.rutaFoto}">
-                    <img class="foto-perfil" src="${pageContext.request.contextPath}/img/usuarios/${tema.tutor.rutaFoto}?v=${now}" alt="Foto de perfil">
+                    <img class="foto-perfil" src="${pageContext.request.contextPath}${tema.tutor.rutaFoto}?v=${now}" alt="Foto de perfil">
                 </c:when>
                 <c:otherwise>
                     <img class="foto-perfil" src="${pageContext.request.contextPath}/img/default-user.jpeg" alt="Foto de perfil">

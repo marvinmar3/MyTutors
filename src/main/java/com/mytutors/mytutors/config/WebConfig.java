@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import java.nio.file.Paths;
 
 
 @Configuration
@@ -19,8 +20,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Servir imágenes desde /usuarios/** a la carpeta real
-        registry.addResourceHandler("/usuarios/**")
-                .addResourceLocations("file:src/main/resources/static/img/usuarios/");
+        String ruta = Paths.get(System.getProperty("user.home"), "mytutors/uploads/img/usuarios").toUri().toString();
+
+        registry.addResourceHandler("/imagenes/**")
+                .addResourceLocations(ruta);
     }
+
 }

@@ -30,7 +30,7 @@
     <div id="modo-lectura">
         <c:choose>
             <c:when test="${not empty usuario.rutaFoto}">
-                <img class="perfil" src="${pageContext.request.contextPath}/img/usuarios/${usuario.rutaFoto}" alt="Foto de perfil">
+                <img class="perfil" src="${pageContext.request.contextPath}${usuario.rutaFoto}" alt="Foto de perfil">
             </c:when>
             <c:otherwise>
                 <img class="perfil" src="${pageContext.request.contextPath}/img/default-user.jpeg" alt="Foto por defecto">

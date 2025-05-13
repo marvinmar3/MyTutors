@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.*;
 import java.util.UUID;
 import java.io.IOException;
+import java.io.File;
 
 
 @Controller
@@ -43,39 +44,32 @@ public class PerfilController {
     private String guardarImagen(MultipartFile archivo) {
         try {
             if (!archivo.isEmpty()) {
-               //validar el nombre del archivo
                 String nombreOriginal = archivo.getOriginalFilename();
                 if (nombreOriginal == null || nombreOriginal.trim().isEmpty()) {
-                    System.out.println("⚠️ El archivo no tiene nombre válido.");
                     return null;
                 }
 
                 String nombreArchivo = UUID.randomUUID().toString() + "_" + nombreOriginal;
 
-
-                String ruta = System.getProperty("user.home") + "/mytutors/imagenes/";
-
-                Path directorio = Paths.get(ruta);
+                // Ruta física en carpeta externa
+                String rutaBase = System.getProperty("user.home") + "/mytutors/uploads/img/usuarios/";
+                Path directorio = Paths.get(rutaBase);
                 if (!Files.exists(directorio)) {
                     Files.createDirectories(directorio);
-                    System.out.println("🗂️ Directorio creado en: " + directorio.toAbsolutePath());
                 }
 
-                Path rutaArchivo = Paths.get(ruta + nombreArchivo);
+                Path rutaArchivo = Paths.get(rutaBase + nombreArchivo);
                 Files.write(rutaArchivo, archivo.getBytes());
 
-                System.out.println("✅ Imagen guardada en: " + rutaArchivo.toAbsolutePath());
-
-                return "/img/usuarios/"+ nombreArchivo;
-            } else {
-                System.out.println("⚠️ El archivo está vacío");
+                // Retorna la ruta que será usada en el navegador
+                return "/imagenes/" + nombreArchivo;
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("❌ Error al intentar guardar la imagen.");
         }
         return null;
     }
+
 
 
     @PostMapping("/actualizar")
