@@ -3,6 +3,7 @@ package com.mytutors.mytutors.model;
 public class ChatMessage {
     private String contenido;
     private String remetente;
+    private String destinatario;
     private String hora;
 
     public String getContenido() {
@@ -28,4 +29,11 @@ public class ChatMessage {
     public void setHora(String hora) {
         this.hora = hora;
     }
+    public String getDestinatario() {
+        return destinatario;
+    }
+    public void setDestinatario(String destinatario) {
+        this.destinatario = destinatario;
+    }
+
 }

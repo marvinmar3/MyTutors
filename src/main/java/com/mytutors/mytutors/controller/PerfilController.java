@@ -53,7 +53,8 @@ public class PerfilController {
                 String nombreArchivo = UUID.randomUUID().toString() + "_" + nombreOriginal;
 
 
-                String ruta = "src/main/resources/static/img/usuarios/";
+                String ruta = System.getProperty("user.home") + "/mytutors/imagenes/";
+
                 Path directorio = Paths.get(ruta);
                 if (!Files.exists(directorio)) {
                     Files.createDirectories(directorio);
@@ -65,7 +66,7 @@ public class PerfilController {
 
                 System.out.println("✅ Imagen guardada en: " + rutaArchivo.toAbsolutePath());
 
-                return nombreArchivo;
+                return "/img/usuarios/"+ nombreArchivo;
             } else {
                 System.out.println("⚠️ El archivo está vacío");
             }
@@ -97,7 +98,7 @@ public class PerfilController {
         {
             if(usuario.getRutaFoto()!=null)
             {
-                Path rutaAnterior = Paths.get("src/main/resources/static/img/usuarios/" + usuario.getRutaFoto());
+                Path rutaAnterior = Paths.get(System.getProperty("user.home") + "/mytutors/imagenes/"+usuario.getRutaFoto());
                 try{
                     Files.deleteIfExists(rutaAnterior);
                     System.out.println("Imagen anterior eliminada correctamente: "+rutaAnterior.toAbsolutePath());
@@ -112,7 +113,7 @@ public class PerfilController {
             {
                 usuario.setRutaFoto(rutaImagen);
                 System.out.println("Imagen guardada en: "+rutaImagen);
-                session.setAttribute("usuario", usuario);
+                //session.setAttribute("usuario", usuario);
             }else {
                 System.out.println("Error al guardar imagen");
             }
@@ -120,7 +121,7 @@ public class PerfilController {
         }
         // No actualizar el correo ni la contraseña aquí
         usuarioRepository.save(usuario);
-        //session.setAttribute("usuario", usuario);
+        session.setAttribute("usuario", usuario);
         return "redirect:/perfil";
     }
 }
