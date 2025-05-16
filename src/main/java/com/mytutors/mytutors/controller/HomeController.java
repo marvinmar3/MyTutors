@@ -1,8 +1,10 @@
 package com.mytutors.mytutors.controller;
 
 import com.mytutors.mytutors.model.Usuario;
+import com.mytutors.mytutors.repository.MateriaRepository;
 import com.mytutors.mytutors.service.UsuarioService;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.ui.Model;
@@ -16,6 +18,9 @@ import java.security.Principal;
 public class HomeController {
     private final UsuarioService usuarioService;
     private final TemaService temaService;
+
+    @Autowired
+    private MateriaRepository materiaRepository;
 
     public HomeController(UsuarioService usuarioService, TemaService temaService) {
         this.usuarioService = usuarioService;
@@ -42,7 +47,12 @@ public class HomeController {
     public String home(Model model, HttpSession session) {
         Usuario usuario= (Usuario) session.getAttribute("usuario");
 
+        if(usuario==null){
+            return "redirect:/login";
+        }
+
         model.addAttribute("usuario", usuario);
+        model.addAttribute("materias", materiaRepository.findAll());
         model.addAttribute("nombreUsuario", usuario!=null?usuario.getNombre():"Invitado");
         model.addAttribute("temas", temaService.obtenerTemas());
 

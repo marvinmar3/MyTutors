@@ -165,3 +165,31 @@ body {
 #panel-chats ul li:hover {
     background-color: #e9ecef;
 }
+#filtro-temas-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+#filtro-temas-form input[type="text"],
+#filtro-temas-form select {
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+#filtro-temas-form .btn-filtrar {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#filtro-temas-form .btn-filtrar:hover {
+    background-color: #0056b3;
+}

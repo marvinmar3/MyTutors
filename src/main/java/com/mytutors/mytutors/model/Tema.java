@@ -11,6 +11,8 @@ public class Tema {
     private String nombre;
     private String descripcion;
 
+    private String rol;
+
     @ManyToOne
     @JoinColumn(name="id_materia")
     private Materia materia;
@@ -18,6 +20,10 @@ public class Tema {
     @ManyToOne
     @JoinColumn(name="id_tutor")
     private Usuario tutor;
+
+    @ManyToOne
+    @JoinColumn(name = "id_creador")
+    private Usuario creador;
 
     public Long getId() {
         return id;
@@ -51,11 +57,26 @@ public class Tema {
         this.materia = materia;
     }
 
+    public Usuario getCreador() {
+        return creador;
+    }
+
+    public void setCreador(Usuario creador) {
+        this.creador = creador;
+    }
+
     public Usuario getTutor() {
         return tutor;
     }
-
     public void setTutor(Usuario tutor) {
         this.tutor = tutor;
+    }
+
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
     }
 }

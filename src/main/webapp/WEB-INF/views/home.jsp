@@ -54,6 +54,36 @@
         </nav>
     </div>
 </c:if>
+
+<form action="${pageContext.request.contextPath}/temas/filtrar" method="get" id="filtro-temas-form">
+    <input type="text" name="texto" placeholder="Buscar por tema o descripción..." class="input-busqueda" />
+
+    <select name="idMateria" class="select-filtro">
+        <option value="">-- Filtrar por materia --</option>
+        <c:forEach var="m" items="${materias}">
+            <option value="${m.id}">${m.nombre}</option>
+        </c:forEach>
+    </select>
+
+    <select name="idTutor" class="select-filtro">
+        <option value="">-- Filtrar por tutor --</option>
+        <c:forEach var="u" items="${tutores}">
+            <option value="${u.id}">${u.nombre}</option>
+        </c:forEach>
+    </select>
+
+    <select name="rol" class="select-filtro">
+        <option value="">-- Filtrar por rol --</option>
+        <option value="tutor">Tutor</option>
+        <option value="tutorado">Tutorado</option>
+    </select>
+
+    <label><input type="checkbox" name="sinTutor" value="true" /> Sin tutor</label>
+
+    <button type="submit" class="btn-filtrar">Filtrar</button>
+</form>
+
+
 <!-- Tarjetas de temas -->
 <main class="usuarios-container">
     <c:if test="${empty temas}">
@@ -75,7 +105,15 @@
             <h3>${tema.nombre}</h3>
             <p><strong>Materia:</strong> ${tema.materia.nombre}</p>
             <p><strong>Descripción:</strong> ${tema.descripcion}</p>
-            <p><strong>Tutor:</strong> ${tema.tutor.nombre}</p>
+            <c:choose>
+                <c:when test="${tema.rol == 'tutor'}">
+                    <p><strong>Tutor:</strong> ${tema.creador.nombre}</p>
+                </c:when>
+                <c:otherwise>
+                    <p><strong>Tutorado:</strong> ${tema.creador.nombre}</p>
+                </c:otherwise>
+            </c:choose>
+
             <a href="${pageContext.request.contextPath}/perfil-tutor?id=${tema.tutor.id}" class="btn-ver">Ver Perfil</a>
         </div>
     </c:forEach>
@@ -108,6 +146,44 @@
         <button onclick="enviarMensaje()">Enviar</button>
     </div>
 </div>
+
+<button onclick="mostrarFormularioTutoria()" class="btn btn-primary">Crear tutoría</button>
+<div id="formularioTutoria" style="display: none; margin-top: 20px;">
+    <form action="${pageContext.request.contextPath}/temas/crear" method="post">
+        <input type="hidden" name="idUsuario" value="${usuario.id}" />
+
+        <label>Título:</label>
+        <input type="text" name="nombre" required class="form-control"/>
+
+        <label>Descripción:</label>
+        <textarea name="descripcion" class="form-control" required></textarea>
+
+        <label>Materia:</label>
+        <select name="idMateria" class="form-control">
+            <c:forEach var="m" items="${materias}">
+                <option value="${m.id}">${m.nombre}</option>
+            </c:forEach>
+        </select>
+
+        <!-- Mostrar solo si tipoUsuario es "ambos" -->
+        <c:if test="${usuario.rolEnApp == 'ambos'}">
+            <label>Rol en esta tutoría:</label>
+            <select name="rol" class="form-control">
+                <option value="tutor">Tutor</option>
+                <option value="tutorado">Tutorado</option>
+            </select>
+        </c:if>
+
+        <!-- Si NO es "ambos", mandamos el rol directamente -->
+        <c:if test="${usuario.tipoUsuario != 'ambos'}">
+            <input type="hidden" name="rol" value="${usuario.rolEnApp}" />
+        </c:if>
+
+        <br/>
+        <button type="submit" class="btn btn-success">Crear</button>
+    </form>
+</div>
+
 
 <!-- Scripts para abrir y cerrar ventanas -->
 <script>
@@ -228,6 +304,14 @@
 
     window.addEventListener("load", conectar);
 </script>
+
+<script>
+    function mostrarFormularioTutoria() {
+        const formulario = document.getElementById("formularioTutoria");
+        formulario.style.display = formulario.style.display === "none" ? "block" : "none";
+    }
+</script>
+
 
 </body>
 </html>
