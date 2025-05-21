@@ -7,6 +7,15 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page session="true" %>
+<%@ page import="com.mytutors.mytutors.model.Usuario" %>
+<%
+    Usuario usuario = (Usuario) session.getAttribute("usuario");
+    if (usuario == null) {
+        response.sendRedirect("login");
+        return;
+    }
+%>
 <html>
 <head>
     <title>Inicio | MyTutors</title>
@@ -22,7 +31,6 @@
 
 <!-- Botón hamburguesa -->
 <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-<!-- <button class="btn-chat" onclick="toggleChatPanel()">💬 Mis Conversaciones</button> -->
 <button class="btn-chat" onclick="cargarConversaciones()">💬 Mis Conversaciones</button>
 
 <!-- Encabezado -->
@@ -55,33 +63,40 @@
     </div>
 </c:if>
 
-<form action="${pageContext.request.contextPath}/temas/filtrar" method="get" id="filtro-temas-form">
-    <input type="text" name="texto" placeholder="Buscar por tema o descripción..." class="input-busqueda" />
-
-    <select name="idMateria" class="select-filtro">
+<div class="filtros-container">
+    <input type="text" id="buscador" placeholder="Buscar por tema o descripción">
+    <select id="filtroMateria">
         <option value="">-- Filtrar por materia --</option>
         <c:forEach var="m" items="${materias}">
-            <option value="${m.id}">${m.nombre}</option>
+            <option value="${m.nombre}">${m.nombre}</option>
         </c:forEach>
     </select>
-
-    <select name="idTutor" class="select-filtro">
+    <%--<select id="filtroTutor">
         <option value="">-- Filtrar por tutor --</option>
-        <c:forEach var="u" items="${tutores}">
-            <option value="${u.id}">${u.nombre}</option>
+        <c:forEach var="t" items="${tutores}">
+            <option value="${t.nombre}">${t.nombre}</option>
+        </c:forEach>
+    </select>--%>
+    <select id="filtroRol">
+        <option value="">-- Filtrar por rol --</option>
+        <option value="asignado">Ya tienen tutor</option>
+        <option value="disponible">Sin tutor</option>
+    </select>
+    <select id="filtroFacultad">
+        <option value="">-- Filtrar por facultad --</option>
+        <c:forEach var="f" items="${facultades}">
+            <option value="${f.nombre}">${f.nombre}</option>
         </c:forEach>
     </select>
-
-    <select name="rol" class="select-filtro">
-        <option value="">-- Filtrar por rol --</option>
-        <option value="tutor">Tutor</option>
-        <option value="tutorado">Tutorado</option>
+    <select id="filtroCarrera">
+        <option value="">-- Filtrar por carrera --</option>
+        <c:forEach var="c" items="${carreras}">
+            <option value="${c.nombre}">${c.nombre}</option>
+        </c:forEach>
     </select>
+    <label><input type="checkbox" id="filtroSinTutor"> Sin tutor</label>
+</div>
 
-    <label><input type="checkbox" name="sinTutor" value="true" /> Sin tutor</label>
-
-    <button type="submit" class="btn-filtrar">Filtrar</button>
-</form>
 
 
 <!-- Tarjetas de temas -->
@@ -91,8 +106,13 @@
     </c:if>
 
     <c:forEach var="tema" items="${temas}">
-        <div class="tarjeta-usuario">
-            <c:choose>
+        <div class="tarjeta-usuario"
+             data-rol="${tema.rol}"
+             data-tiene-tutor="<c:out value='${tema.tutor != null}'/>"
+             data-carrera="${tema.materia.carrera.nombre}"
+             data-facultad="${tema.materia.facultad.nombre}">
+
+        <c:choose>
                 <c:when test="${not empty tema.tutor.rutaFoto}">
                     <img class="foto-perfil" src="${pageContext.request.contextPath}${tema.tutor.rutaFoto}?v=${now}" alt="Foto de perfil">
                 </c:when>
@@ -103,18 +123,39 @@
 
 
             <h3>${tema.nombre}</h3>
-            <p><strong>Materia:</strong> ${tema.materia.nombre}</p>
+            <p>
+                <strong>Materia:</strong>
+                <c:choose>
+                    <c:when test="${not empty tema.materia}">
+                        ${tema.materia.nombre}
+                    </c:when>
+                    <c:otherwise><em>Sin asignar</em></c:otherwise>
+                </c:choose>
+            </p>
             <p><strong>Descripción:</strong> ${tema.descripcion}</p>
-            <c:choose>
-                <c:when test="${tema.rol == 'tutor'}">
-                    <p><strong>Tutor:</strong> ${tema.creador.nombre}</p>
-                </c:when>
-                <c:otherwise>
-                    <p><strong>Tutorado:</strong> ${tema.creador.nombre}</p>
-                </c:otherwise>
-            </c:choose>
 
-            <a href="${pageContext.request.contextPath}/perfil-tutor?id=${tema.tutor.id}" class="btn-ver">Ver Perfil</a>
+            <p><strong>Tutor:</strong>
+                <c:choose>
+                    <c:when test="${not empty tema.tutor}">
+                        ${tema.tutor.nombre}
+                    </c:when>
+                    <c:when test="${tema.rol == 'tutor'}">
+                        ${tema.creador.nombre}
+                    </c:when>
+                    <c:otherwise>Sin asignar</c:otherwise>
+                </c:choose>
+            </p>
+
+            <p><strong>Tutorado:</strong>
+                <c:choose>
+                    <c:when test="${tema.rol == 'tutorado'}">
+                        ${tema.creador.nombre}
+                    </c:when>
+                    <c:otherwise>Sin asignar</c:otherwise>
+                </c:choose>
+            </p>
+
+            <a href="${pageContext.request.contextPath}/temas/detalle?id=${tema.id}" class="btn-ver">Ver tema</a>
         </div>
     </c:forEach>
 </main>
@@ -132,7 +173,6 @@
 </div>
 
 <!-- Ventana flotante de chat -->
-<!-- Ventana flotante de chat -->
 <div id="chat-window" class="hidden">
     <div class="chat-header">
         <span>Mensajes</span>
@@ -147,7 +187,12 @@
     </div>
 </div>
 
-<button onclick="mostrarFormularioTutoria()" class="btn btn-primary">Crear tutoría</button>
+<div class="contenedor-crear-tutoria">
+    <button onclick="mostrarFormularioTutoria()" class="btn btn-primary" id="btn-crear-tutoria">
+        ➕ Crear tutoría
+    </button>
+</div>
+
 <div id="formularioTutoria" style="display: none; margin-top: 20px;">
     <form action="${pageContext.request.contextPath}/temas/crear" method="post">
         <input type="hidden" name="idUsuario" value="${usuario.id}" />
@@ -158,11 +203,27 @@
         <label>Descripción:</label>
         <textarea name="descripcion" class="form-control" required></textarea>
 
+        <label>Facultad:</label>
+        <select name="id_facultad" id="facultad" required>
+            <option value="">Selecciona una facultad</option>
+            <c:forEach var="f" items="${facultades}">
+                <option value="${f.id}">${f.nombre}</option>
+            </c:forEach>
+        </select>
+
+        <label>Carrera:</label>
+        <select id="carrera" name="id_carrera" required>
+            <option value="">Selecciona una carrera</option>
+        </select>
+
+
         <label>Materia:</label>
-        <select name="idMateria" class="form-control">
+        <select id="materia" name="id_materia" required>
+            <option value="">Selecciona una materia</option>
             <c:forEach var="m" items="${materias}">
                 <option value="${m.id}">${m.nombre}</option>
             </c:forEach>
+            <option value="otra">Otra...</option>
         </select>
 
         <!-- Mostrar solo si tipoUsuario es "ambos" -->
@@ -174,12 +235,17 @@
             </select>
         </c:if>
 
+        <div id="materiaNuevaDiv" style="display:none;">
+            <label>Nombre de la nueva materia:</label>
+            <input type="text" name="nuevaMateria" id="nuevaMateria" class="form-control"/>
+        </div>
+
         <!-- Si NO es "ambos", mandamos el rol directamente -->
         <c:if test="${usuario.tipoUsuario != 'ambos'}">
             <input type="hidden" name="rol" value="${usuario.rolEnApp}" />
         </c:if>
-
         <br/>
+        <br>
         <button type="submit" class="btn btn-success">Crear</button>
     </form>
 </div>
@@ -306,12 +372,157 @@
 </script>
 
 <script>
+    let listenersAgregados = false;
+
     function mostrarFormularioTutoria() {
         const formulario = document.getElementById("formularioTutoria");
         formulario.style.display = formulario.style.display === "none" ? "block" : "none";
+
+        // Solo agregamos los listeners una vez
+        if (!listenersAgregados) {
+            agregarListenersEncadenamiento();
+            listenersAgregados = true;
+        }
     }
+
+    function agregarListenersEncadenamiento() {
+        const facultadSelect = document.getElementById("facultad");
+        const carreraSelect = document.getElementById("carrera");
+        const materiaSelect = document.getElementById("materia");
+        const divNueva = document.getElementById("materiaNuevaDiv");
+        const nuevaMateriaInput = document.getElementById("nuevaMateria");
+
+        facultadSelect.addEventListener("change", function () {
+            const idFacultad = this.value;
+
+            // Verificamos que no esté vacío
+            if (!idFacultad || idFacultad === "") {
+                console.warn("Facultad no seleccionada.");
+                return;
+            }
+
+            carreraSelect.innerHTML = '<option value="">Cargando carreras...</option>';
+            materiaSelect.innerHTML = '<option value="">Selecciona una materia</option>';
+
+            fetch(`/temas/carreras?id_facultad=${idFacultad}`)
+                .then(resp => resp.json())
+                .then(data => {
+                    carreraSelect.innerHTML = '<option value="">Selecciona una carrera</option>';
+
+                    if (!Array.isArray(data)) {
+                        console.error("Respuesta de carreras no es un arreglo:", data);
+                        return;
+                    }
+
+                    data.forEach(c => {
+                        const opt = document.createElement("option");
+                        opt.value = c.id;
+                        opt.textContent = c.nombre;
+                        carreraSelect.appendChild(opt);
+                    });
+                })
+                .catch(err => {
+                    console.error("Error cargando carreras:", err);
+                });
+        });
+
+        carreraSelect.addEventListener("change", function () {
+            const idCarrera = this.value;
+
+            if (!idCarrera) {
+                materiaSelect.innerHTML = '<option value="">Selecciona una materia</option>';
+                return;
+            }
+
+            materiaSelect.innerHTML = '<option value="">Cargando materias...</option>';
+
+            fetch(`/temas/materias?id_carrera=${idCarrera}`)
+                .then(resp => resp.json())
+                .then(data => {
+                    materiaSelect.innerHTML = '<option value="">Selecciona una materia</option>';
+                    data.forEach(m => {
+                        const opt = document.createElement("option");
+                        opt.value = m.id;
+                        opt.textContent = m.nombre;
+                        materiaSelect.appendChild(opt);
+                    });
+
+                    const otra = document.createElement("option");
+                    otra.value = "otra";
+                    otra.textContent = "Otra...";
+                    materiaSelect.appendChild(otra);
+                }).catch(err => console.error("Error cargando materias:", err));
+        });
+
+        materiaSelect.addEventListener("change", function () {
+            if (this.value === "otra") {
+                divNueva.style.display = "block";
+                nuevaMateriaInput.required = true;
+            } else {
+                divNueva.style.display = "none";
+                nuevaMateriaInput.required = false;
+            }
+        });
+    }
+
 </script>
 
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const filtros = {
+            texto: document.getElementById("buscador"),
+            materia: document.getElementById("filtroMateria"),
+            //tutor: document.getElementById("filtroTutor"),
+            rol: document.getElementById("filtroRol"),
+            facultad: document.getElementById("filtroFacultad"),
+            carrera: document.getElementById("filtroCarrera"),
+            sinTutor: document.getElementById("filtroSinTutor")
+        };
+
+        const tarjetas = document.querySelectorAll(".tarjeta-usuario");
+
+        function filtrar() {
+            const texto = filtros.texto.value.toLowerCase();
+            const materia = filtros.materia.value;
+            //const tutor = filtros.tutor.value;
+            const rol = filtros.rol.value;
+            const facultad = filtros.facultad.value;
+            const carrera = filtros.carrera.value;
+            const sinTutor = filtros.sinTutor.checked;
+
+            tarjetas.forEach(tarjeta => {
+                const nombre = tarjeta.querySelector("h3").textContent.toLowerCase();
+                const desc = tarjeta.querySelector("p:nth-of-type(2)").textContent.toLowerCase();
+                const mat = tarjeta.querySelector("p:nth-of-type(1)").textContent.toLowerCase();
+                const tutorTexto = tarjeta.querySelector("p:nth-of-type(3)").textContent.toLowerCase();
+                const fac = tarjeta.dataset.facultad;
+                const car = tarjeta.dataset.carrera;
+
+                const cumple = (
+                    (texto === "" || nombre.includes(texto) || desc.includes(texto)) &&
+                    (materia === "" || mat.includes(materia.toLowerCase())) &&
+                    //(tutor === "" || tutorTexto.includes(tutor.toLowerCase())) &&
+                    (rol === "" || (rol === "asignado" && tarjeta.dataset.tieneTutor === "true") ||
+                        (rol === "disponible" && tarjeta.dataset.tieneTutor === "false")) &&
+                    (facultad === "" || fac === facultad) &&
+                    (carrera === "" || car === carrera) &&
+                    (!sinTutor || tarjeta.dataset.tieneTutor === "false")
+
+                );
+
+                tarjeta.style.display = cumple ? "block" : "none";
+            });
+        }
+
+        Object.values(filtros).forEach(input => {
+            input.addEventListener("input", filtrar);
+            input.addEventListener("change", filtrar);
+        });
+
+        filtrar(); // Mostrar todo al inicio
+    });
+</script>
 
 </body>
 </html>

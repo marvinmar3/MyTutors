@@ -38,8 +38,28 @@
         </c:choose>
 
         <p><strong>Nombre Completo: </strong> ${usuario.nombre}</p>
-        <p><strong>Facultad: </strong> ${usuario.facultad.nombre}</p>
+        <p><strong>Correo:</strong> ${usuario.correo}</p>
+        <p>
+            <strong>Tipo de usuario:</strong>
+            <c:choose>
+                <c:when test="${usuario.tipoUsuario == 'profesor'}">👨‍🏫 Profesor</c:when>
+                <c:when test="${usuario.tipoUsuario == 'estudiante'}">🎓 Estudiante</c:when>
+                <c:otherwise>👤 ${usuario.tipoUsuario}</c:otherwise>
+            </c:choose>
+        </p>
+
         <p><strong>Carrera: </strong> ${usuario.carrera.nombre}</p>
+        <p><strong>Facultad: </strong> ${usuario.facultad.nombre}</p>
+        <p>
+            <strong>Rol en la app:</strong>
+            <c:choose>
+                <c:when test="${usuario.rolEnApp == 'tutor'}">📘 Tutor</c:when>
+                <c:when test="${usuario.rolEnApp == 'tutorado'}">📗 Tutorado</c:when>
+                <c:otherwise>📚 Tutor/Tutorado</c:otherwise>
+            </c:choose>
+        </p>
+
+
 
         <button onclick="mostrarFormularioEdicion()">Modificar</button>
     </div>
@@ -52,14 +72,11 @@
 
             <input type="text" name="nombre" value="${usuario.nombre}" required />
 
-            <label>Facultad:</label>
-            <select name="facultadId" id="facultad">
-                <c:forEach var="facultad" items="${facultades}">
-                    <option value="${facultad.id}" <c:if test="${facultad.id == usuario.facultad.id}">selected</c:if>>
-                            ${facultad.nombre}
-                    </option>
-                </c:forEach>
-            </select>
+            <label>Correo institucional:</label>
+            <input type="text" value="${usuario.correo}" readonly />
+
+            <label>Tipo de usuario:</label>
+            <input type="text" value="${usuario.tipoUsuario}" readonly />
 
             <label>Carrera:</label>
             <select id="carrera" name="carreraId">
@@ -69,6 +86,18 @@
                     </option>
                 </c:forEach>
             </select>
+
+            <label>Facultad:</label>
+            <select name="facultadId" id="facultad">
+                <c:forEach var="facultad" items="${facultades}">
+                    <option value="${facultad.id}" <c:if test="${facultad.id == usuario.facultad.id}">selected</c:if>>
+                            ${facultad.nombre}
+                    </option>
+                </c:forEach>
+            </select>
+
+            <label>Rol en la app:</label>
+            <input type="text" value="${usuario.rolEnApp}" readonly />
 
             <label>Imagen de perfil:</label>
             <input type="file" name="imagen" accept="image/*" />

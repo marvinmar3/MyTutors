@@ -1,6 +1,8 @@
 package com.mytutors.mytutors.controller;
 
 import com.mytutors.mytutors.model.Usuario;
+import com.mytutors.mytutors.repository.CarreraRepository;
+import com.mytutors.mytutors.repository.FacultadRepository;
 import com.mytutors.mytutors.repository.MateriaRepository;
 import com.mytutors.mytutors.service.UsuarioService;
 import jakarta.servlet.http.HttpSession;
@@ -22,27 +24,17 @@ public class HomeController {
     @Autowired
     private MateriaRepository materiaRepository;
 
+    @Autowired
+    private FacultadRepository facultadRepository;
+
+    @Autowired
+    private CarreraRepository carreraRepository;
+
     public HomeController(UsuarioService usuarioService, TemaService temaService) {
         this.usuarioService = usuarioService;
         this.temaService = temaService;
     }
 
-    //@GetMapping("/")
-    /*public String index()
-    {
-        return "index";
-    }
-
-    @GetMapping("/home")
-    public String home(Model model, Principal principal){
-        String correo = principal.getName();
-        Usuario usuario = usuarioService.buscarPorCorreo(correo);
-
-        model.addAttribute("nombreUsuario", usuario.getNombre());
-        model.addAttribute("tipoUsuario", usuario.getTipoUsuario());
-
-        return "home";
-    }*/
     @GetMapping("/home")
     public String home(Model model, HttpSession session) {
         Usuario usuario= (Usuario) session.getAttribute("usuario");
@@ -56,7 +48,10 @@ public class HomeController {
         model.addAttribute("nombreUsuario", usuario!=null?usuario.getNombre():"Invitado");
         model.addAttribute("temas", temaService.obtenerTemas());
 
-        List<Tema> temas = temaService.obtenerTemas();
+        model.addAttribute("carreras", carreraRepository.findAll());
+        model.addAttribute("facultades", facultadRepository.findAll());
+
+        //List<Tema> temas = temaService.obtenerTemas();
         return "home";
     }
 

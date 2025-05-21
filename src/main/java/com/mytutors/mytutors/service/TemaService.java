@@ -1,5 +1,6 @@
 package com.mytutors.mytutors.service;
 
+import com.mytutors.mytutors.model.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,6 +55,17 @@ public class TemaService {
         return temaRepository.findAll();
     }
 
+    public void guardarTema(Tema tema, Usuario usuario, String rol) {
+        if("tutor".equalsIgnoreCase(rol)){
+            tema.setTutor(usuario);
+        }else{
+            tema.setTutor(null);
+        }
+        tema.setIdCreador(usuario.getId());
+        tema.setCreador(usuario);
+        tema.setRol(rol);
 
+        temaRepository.save(tema);
+    }
 
 }

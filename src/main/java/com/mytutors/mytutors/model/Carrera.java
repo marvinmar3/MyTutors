@@ -1,5 +1,6 @@
 package com.mytutors.mytutors.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class Carrera {
 
     @ManyToOne
     @JoinColumn(name="id_facultad")
+    @JsonIgnore
     private Facultad facultad;
 
     public Long getId() {
