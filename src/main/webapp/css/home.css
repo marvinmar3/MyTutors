@@ -56,7 +56,11 @@ body {
     border-radius: 50%;
     margin-bottom: 0.5rem;
 }
-
+.sidebar-content{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
 .sidebar-nav {
     display: flex;
     flex-direction: column;
@@ -208,70 +212,119 @@ body {
     box-sizing: border-box;
 }
 
-/* Botón Crear Tutoría */
-#btn-crear-tutoria {
-    background-color: #0d6efd;
-    color: white;
-    border: none;
-    font-size: 1.1rem;
-    padding: 10px 20px;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-}
-
-#btn-crear-tutoria:hover {
-    background-color: #0b5ed7;
-    transform: scale(1.05);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Contenedor del formulario */
-#formularioTutoria {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
-    max-width: 600px;
-    margin: 20px auto;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Estilo para los campos del formulario */
-
-.contenedor-crear-tutoria {
+/*
+nuevoTema
+*/
+.alert {
+    padding: 12px 20px;
+    margin: 10px auto;
+    width: 80%;
+    border-radius: 8px;
+    font-size: 16px;
     text-align: center;
-    margin-bottom: 20px;
+    font-weight: bold;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.alert.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#formularioTutoria {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 #formularioTutoria label {
-    font-weight: bold;
-    margin-top: 10px;
     display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    margin-top: 16px;
+    color: #333;
 }
 
-#formularioTutoria .form-control {
-    margin-bottom: 15px;
-    padding: 8px;
-    font-size: 1rem;
+#formularioTutoria input[type="text"],
+#formularioTutoria input[type="email"],
+#formularioTutoria input[type="password"],
+#formularioTutoria textarea,
+#formularioTutoria select {
     width: 100%;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
+    padding: 10px 12px;
+    margin-top: 4px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
 }
 
-/* Botón de enviar */
-#formularioTutoria button[type="submit"] {
+#formularioTutoria textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+#formularioTutoria .btn {
+    display: block;
     width: 100%;
-    padding: 10px;
-    font-size: 1.1rem;
-    background-color: #198754;
-    color: white;
+    margin-top: 20px;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #118acb;
+    color: #fff;
     border: none;
     border-radius: 8px;
+    cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
-#formularioTutoria button[type="submit"]:hover {
-    background-color: #157347;
+#formularioTutoria .btn:hover {
+    background-color: #0b6fa3;
 }
+
+/* Mensaje de éxito / error */
+.alert {
+    padding: 12px 20px;
+    margin: 20px auto;
+    width: 80%;
+    border-radius: 8px;
+    font-size: 16px;
+    text-align: center;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: opacity 0.5s ease-out;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.alert.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
 

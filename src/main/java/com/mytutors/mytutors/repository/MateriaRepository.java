@@ -7,4 +7,5 @@ import com.mytutors.mytutors.model.Carrera;
 
 public interface MateriaRepository extends JpaRepository<Materia, Long> {
     List<Materia> findByCarrera(Carrera carrera);
+    List<Materia> findByNombreIgnoreCaseAndCarrera_Id(String nombre, Long idCarrera);
 }

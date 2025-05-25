@@ -4,6 +4,7 @@ import com.mytutors.mytutors.model.Usuario;
 import com.mytutors.mytutors.repository.MateriaRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.batch.BatchTransactionManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import com.mytutors.mytutors.model.Tema;
@@ -18,6 +19,10 @@ import com.mytutors.mytutors.model.Carrera;
 import com.mytutors.mytutors.dto.CarreraDTO;
 import com.mytutors.mytutors.model.Facultad;
 import com.mytutors.mytutors.repository.FacultadRepository;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Collections;
+
 
 @Controller
 @RequestMapping("/temas")
@@ -44,42 +49,68 @@ public class TemaController {
     @PostMapping("/crear")
     public String crearTema(@RequestParam String nombre,
                             @RequestParam String descripcion,
-                            @RequestParam (required = false) Long idMateria,
-                            @RequestParam (required = false) String nuevaMateria,
-                            @RequestParam Long idFacultad,
-                            @RequestParam Long idCarrera,
+                            @RequestParam(name = "id_materia", required = false) String idMateriaStr,
+                            @RequestParam(name = "nuevaMateria", required = false) String nuevaMateria,
+                            @RequestParam(name = "id_facultad") Long idFacultad,
+                            @RequestParam(name = "id_carrera") Long idCarrera,
                             @RequestParam String rol,
-                            HttpSession session) {
+                            HttpSession session,
+                            RedirectAttributes redirectAttributes,
+                            Model model) {
 
         Usuario usuario = (Usuario) session.getAttribute("usuario");
-        //Materia materia = materiaRepository.findById(idMateria).orElse(null);
+        if (usuario == null) {
+            return "redirect:/login";
+        }
 
-        Materia materia;
-        if ("otra".equals(String.valueOf(idMateria)) && nuevaMateria != null && !nuevaMateria.isBlank()) {
+        Materia materia =null;
+        Long idMateria = null;
+
+        boolean esMateriaNueva = "otra".equalsIgnoreCase(idMateriaStr);
+
+        if (esMateriaNueva && nuevaMateria != null && !nuevaMateria.isBlank()) {
+            // Validar que no exista una materia con ese nombre en esa carrera
+            List<Materia> existentes = materiaRepository.findByNombreIgnoreCaseAndCarrera_Id(nuevaMateria.trim(), idCarrera);
+            if (!existentes.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "⚠️ Ya existe una materia con ese nombre en la carrera seleccionada.");
+                return "redirect:/temas/nuevo";
+            }
+
+            Carrera carrera = carreraRepository.findById(idCarrera)
+                    .orElseThrow(() -> new IllegalArgumentException("Carrera no encontrada para id: " + idCarrera));
+
             materia = new Materia();
-            materia.setNombre(nuevaMateria);
-            materia.setCarrera(carreraRepository.findById(idCarrera).orElse(null));
-            materiaRepository.save(materia); // guardar nueva materia
+            materia.setNombre(nuevaMateria.trim());
+            materia.setCarrera(carrera);
+            materiaRepository.save(materia);
         } else {
+            try {
+                idMateria = Long.parseLong(idMateriaStr);
+            } catch (NumberFormatException e) {
+                return "redirect:/temas/nuevo"; // o mostrar mensaje de error
+            }
+
             materia = materiaRepository.findById(idMateria).orElse(null);
         }
 
-        if (usuario != null && materia != null) {
+        if (materia != null) {
             Tema tema = new Tema();
-            tema.setNombre(nombre);
-            tema.setDescripcion(descripcion);
-            tema.setIdMateria(idMateria);
+            tema.setNombre(nombre.trim());
+            tema.setDescripcion(descripcion.trim());
+            tema.setIdMateria(materia.getId());
             tema.setMateria(materia);
             tema.setIdCreador(usuario.getId());
             tema.setRol(rol);
-            //tema.setTutor(usuario); // o tutorado, depende de cómo manejes esto
 
             temaService.guardarTema(tema, usuario, rol);
-
+            redirectAttributes.addFlashAttribute("exito", "La tutoría fue creada exitosamente!");
+            return "redirect:/home";
+        }else{
+            redirectAttributes.addFlashAttribute("error", "No se pudo registrar el tema por datos incompletos.");
+            return "redirect:/temas/nuevo";
         }
-
-        return "redirect:/home";
     }
+
 
     @GetMapping("/filtrar")
     public String filtrarTemas(@RequestParam(required = false) Long idMateria,
@@ -113,6 +144,7 @@ public class TemaController {
     @GetMapping("/carreras")
     @ResponseBody
     public List<CarreraDTO> obtenerCarrerasPorFacultad(@RequestParam("id_facultad") Long idFacultad) {
+        if (idFacultad == null) return Collections.emptyList();
         Facultad facultad = facultadRepository.findById(idFacultad).orElse(null);
         List<Carrera> carreras = carreraRepository.findByFacultad(facultad);
 
@@ -127,5 +159,37 @@ public class TemaController {
     public List<Materia> obtenerMateriasPorCarrera(@RequestParam("id_carrera") Long idCarrera) {
         Carrera carrera = carreraRepository.findById(idCarrera).orElse(null);
         return materiaRepository.findByCarrera(carrera);
+    }
+
+    @GetMapping("/ver")
+    public String verTema(@RequestParam Long idTema, Model model, HttpSession session) {
+        Tema tema = temaRepository.findById(idTema).orElse(null);
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+
+        if(tema!=null) {
+            model.addAttribute("tema", tema);
+            model.addAttribute("usuario", usuario);
+
+            boolean match =(tema.getTutor()!=null && tema.getTutor().getId().equals(usuario.getId())) ||
+                    (tema.getCreador()!= null && tema.getCreador().getId().equals(usuario.getId()));
+
+            model.addAttribute("match", match);
+            return "verTema";
+        }
+        return "redirect:/home";
+    }
+
+    @GetMapping("/nuevo")
+    public String mostrarFormNuevoTema(Model model, HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if(usuario==null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("usuario", usuario);
+        model.addAttribute("facultades", facultadRepository.findAll());
+        model.addAttribute("materias", materiaRepository.findAll());
+
+        return "nuevoTema";
+
     }
 }

@@ -1,0 +1,59 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #e0f0ff;
+    margin: 0;
+    padding: 0;
+}
+
+.contenedor {
+    max-width: 800px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #1976d2;
+    margin-bottom: 30px;
+}
+
+.tarjeta-detalle h2 {
+    margin-top: 0;
+    color: #0d47a1;
+}
+
+p {
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+.btn-chat, .btn-volver {
+    display: inline-block;
+    margin-top: 20px;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.btn-chat {
+    background-color: #0d47a1;
+    color: white;
+    margin-right: 10px;
+}
+
+.btn-chat:hover {
+    background-color: #1565c0;
+}
+
+.btn-volver {
+    background-color: #eeeeee;
+    color: #333;
+}
+
+.btn-volver:hover {
+    background-color: #cccccc;
+}

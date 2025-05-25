@@ -1,5 +1,6 @@
 package com.mytutors.mytutors.model;
 
+
 import jakarta.persistence.*;
 //import java.time.LocalDateTime;
 
@@ -14,6 +15,10 @@ public class Conversacion {
     private String nombre;
     private String tipo;
     //private String LocalDateTime fecha_creado;
+
+    @ManyToOne
+    @JoinColumn(name = "id_tema")
+    private Tema tema;
 
     public Long getId() {
         return id;
@@ -39,4 +44,11 @@ public class Conversacion {
         this.nombre = nombre;
     }
 
+    public Tema getTema() {
+        return tema;
+    }
+
+    public void setTema(Tema tema) {
+        this.tema = tema;
+    }
 }

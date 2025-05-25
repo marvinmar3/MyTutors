@@ -57,6 +57,7 @@
             <a href="${pageContext.request.contextPath}/perfil">Mi perfil</a>
             <a href="${pageContext.request.contextPath}/aprendizaje">Mi aprendizaje</a>
             <a href="${pageContext.request.contextPath}/grupos">Mis grupos</a>
+            <a href="${pageContext.request.contextPath}/temas/nuevo">➕ Crear tutoría</a>
             <a href="${pageContext.request.contextPath}/configuracion">Configuración</a>
             <a href="${pageContext.request.contextPath}/logout" class="logout">Cerrar sesión</a>
         </nav>
@@ -187,70 +188,6 @@
     </div>
 </div>
 
-<div class="contenedor-crear-tutoria">
-    <button onclick="mostrarFormularioTutoria()" class="btn btn-primary" id="btn-crear-tutoria">
-        ➕ Crear tutoría
-    </button>
-</div>
-
-<div id="formularioTutoria" style="display: none; margin-top: 20px;">
-    <form action="${pageContext.request.contextPath}/temas/crear" method="post">
-        <input type="hidden" name="idUsuario" value="${usuario.id}" />
-
-        <label>Título:</label>
-        <input type="text" name="nombre" required class="form-control"/>
-
-        <label>Descripción:</label>
-        <textarea name="descripcion" class="form-control" required></textarea>
-
-        <label>Facultad:</label>
-        <select name="id_facultad" id="facultad" required>
-            <option value="">Selecciona una facultad</option>
-            <c:forEach var="f" items="${facultades}">
-                <option value="${f.id}">${f.nombre}</option>
-            </c:forEach>
-        </select>
-
-        <label>Carrera:</label>
-        <select id="carrera" name="id_carrera" required>
-            <option value="">Selecciona una carrera</option>
-        </select>
-
-
-        <label>Materia:</label>
-        <select id="materia" name="id_materia" required>
-            <option value="">Selecciona una materia</option>
-            <c:forEach var="m" items="${materias}">
-                <option value="${m.id}">${m.nombre}</option>
-            </c:forEach>
-            <option value="otra">Otra...</option>
-        </select>
-
-        <!-- Mostrar solo si tipoUsuario es "ambos" -->
-        <c:if test="${usuario.rolEnApp == 'ambos'}">
-            <label>Rol en esta tutoría:</label>
-            <select name="rol" class="form-control">
-                <option value="tutor">Tutor</option>
-                <option value="tutorado">Tutorado</option>
-            </select>
-        </c:if>
-
-        <div id="materiaNuevaDiv" style="display:none;">
-            <label>Nombre de la nueva materia:</label>
-            <input type="text" name="nuevaMateria" id="nuevaMateria" class="form-control"/>
-        </div>
-
-        <!-- Si NO es "ambos", mandamos el rol directamente -->
-        <c:if test="${usuario.tipoUsuario != 'ambos'}">
-            <input type="hidden" name="rol" value="${usuario.rolEnApp}" />
-        </c:if>
-        <br/>
-        <br>
-        <button type="submit" class="btn btn-success">Crear</button>
-    </form>
-</div>
-
-
 <!-- Scripts para abrir y cerrar ventanas -->
 <script>
 
@@ -371,101 +308,6 @@
     window.addEventListener("load", conectar);
 </script>
 
-<script>
-    let listenersAgregados = false;
-
-    function mostrarFormularioTutoria() {
-        const formulario = document.getElementById("formularioTutoria");
-        formulario.style.display = formulario.style.display === "none" ? "block" : "none";
-
-        // Solo agregamos los listeners una vez
-        if (!listenersAgregados) {
-            agregarListenersEncadenamiento();
-            listenersAgregados = true;
-        }
-    }
-
-    function agregarListenersEncadenamiento() {
-        const facultadSelect = document.getElementById("facultad");
-        const carreraSelect = document.getElementById("carrera");
-        const materiaSelect = document.getElementById("materia");
-        const divNueva = document.getElementById("materiaNuevaDiv");
-        const nuevaMateriaInput = document.getElementById("nuevaMateria");
-
-        facultadSelect.addEventListener("change", function () {
-            const idFacultad = this.value;
-
-            // Verificamos que no esté vacío
-            if (!idFacultad || idFacultad === "") {
-                console.warn("Facultad no seleccionada.");
-                return;
-            }
-
-            carreraSelect.innerHTML = '<option value="">Cargando carreras...</option>';
-            materiaSelect.innerHTML = '<option value="">Selecciona una materia</option>';
-
-            fetch(`/temas/carreras?id_facultad=${idFacultad}`)
-                .then(resp => resp.json())
-                .then(data => {
-                    carreraSelect.innerHTML = '<option value="">Selecciona una carrera</option>';
-
-                    if (!Array.isArray(data)) {
-                        console.error("Respuesta de carreras no es un arreglo:", data);
-                        return;
-                    }
-
-                    data.forEach(c => {
-                        const opt = document.createElement("option");
-                        opt.value = c.id;
-                        opt.textContent = c.nombre;
-                        carreraSelect.appendChild(opt);
-                    });
-                })
-                .catch(err => {
-                    console.error("Error cargando carreras:", err);
-                });
-        });
-
-        carreraSelect.addEventListener("change", function () {
-            const idCarrera = this.value;
-
-            if (!idCarrera) {
-                materiaSelect.innerHTML = '<option value="">Selecciona una materia</option>';
-                return;
-            }
-
-            materiaSelect.innerHTML = '<option value="">Cargando materias...</option>';
-
-            fetch(`/temas/materias?id_carrera=${idCarrera}`)
-                .then(resp => resp.json())
-                .then(data => {
-                    materiaSelect.innerHTML = '<option value="">Selecciona una materia</option>';
-                    data.forEach(m => {
-                        const opt = document.createElement("option");
-                        opt.value = m.id;
-                        opt.textContent = m.nombre;
-                        materiaSelect.appendChild(opt);
-                    });
-
-                    const otra = document.createElement("option");
-                    otra.value = "otra";
-                    otra.textContent = "Otra...";
-                    materiaSelect.appendChild(otra);
-                }).catch(err => console.error("Error cargando materias:", err));
-        });
-
-        materiaSelect.addEventListener("change", function () {
-            if (this.value === "otra") {
-                divNueva.style.display = "block";
-                nuevaMateriaInput.required = true;
-            } else {
-                divNueva.style.display = "none";
-                nuevaMateriaInput.required = false;
-            }
-        });
-    }
-
-</script>
 
 
 <script>
