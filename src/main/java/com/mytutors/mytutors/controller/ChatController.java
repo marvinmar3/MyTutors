@@ -1,5 +1,6 @@
 package com.mytutors.mytutors.controller;
 
+import com.mytutors.mytutors.dto.ConversacionVistaDTO;
 import com.mytutors.mytutors.model.Conversacion;
 import com.mytutors.mytutors.model.Usuario;
 import com.mytutors.mytutors.service.ConversacionService;
@@ -23,24 +24,27 @@ public class ChatController {
 
     @GetMapping("/mis-conversaciones")
     @ResponseBody
-    public List<Conversacion> obtenerConversaciones(HttpSession session) {
+    public List<ConversacionVistaDTO> obtenerConversaciones(HttpSession session) {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
-        System.out.println("Usuario en sesion: " + usuario.getNombre() + "(ID: "+ usuario.getId() + ")");
 
-        if (usuario == null) {
-            List<Conversacion> conversaciones= conversacionService.obtenerConversaciones(usuario.getId());
+        if (usuario != null) {
+            System.out.println("Usuario en sesion: " + usuario.getNombre() + "(ID: "+ usuario.getId() + ")");
+            List<ConversacionVistaDTO> conversaciones = conversacionService.obtenerConversaciones(usuario.getId());
+
             if (conversaciones != null && !conversaciones.isEmpty()) {
-                System.out.println("conversaciones encontradas"+ conversaciones.size());
-                conversaciones.forEach(conv ->System.out.println("Conversación: " + conv.getNombre()));
+                System.out.println("conversaciones encontradas: " + conversaciones.size());
+                conversaciones.forEach(conv -> System.out.println("Conversación: " + conv.getNombre()));
                 return conversaciones;
-            }else{
-                System.out.println("conversaciones no encontradas");
+            } else {
+                System.out.println("No se encontraron conversaciones");
             }
-        }else{
-            System.out.println("usuario no encontrado");
+        } else {
+            System.out.println("Usuario no encontrado en sesión");
         }
+
         return Collections.emptyList();
     }
+
 
     @GetMapping("/tema/{idTema}")
     public String chatPorTema(@PathVariable Long idTema, HttpSession session, Model model) {

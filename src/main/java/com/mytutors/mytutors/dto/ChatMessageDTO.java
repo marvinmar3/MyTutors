@@ -1,37 +1,22 @@
-package com.mytutors.mytutors.model;
+package com.mytutors.mytutors.dto;
 
-
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import lombok.Data;
 
-@Entity
-@Table(name = "mensaje")
-public class Mensaje {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "id_conversacion")
+@Data
+public class ChatMessageDTO {
     private Long idConversacion;
-
-    @Column(name = "id_emisor")
     private Long idEmisor;
-
-    @Column(name = "contenido")
     private String contenido;
-
-    @Column(name = "leido")
-    private Boolean leido;
-
     private LocalDateTime fechaEnvio;
+    private String nombreEmisor;
 
-    public Long getId() {
-        return id;
+    public String getNombreEmisor() {
+        return nombreEmisor;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setNombreEmisor(String nombreEmisor) {
+        this.nombreEmisor = nombreEmisor;
     }
 
     public Long getIdConversacion() {
@@ -58,17 +43,10 @@ public class Mensaje {
         this.contenido = contenido;
     }
 
-    public Boolean getLeido() {
-        return leido;
-    }
-
-    public void setLeido(Boolean leido) {
-        this.leido = leido;
-    }
-
     public LocalDateTime getFechaEnvio() {
         return fechaEnvio;
     }
+
     public void setFechaEnvio(LocalDateTime fechaEnvio) {
         this.fechaEnvio = fechaEnvio;
     }

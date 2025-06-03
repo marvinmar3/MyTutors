@@ -13,10 +13,11 @@ public class Materia {
     private String nombre;
     private String descripcion;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_facultad")
     private Facultad facultad;
-    @ManyToOne
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="id_carrera")
     private Carrera carrera;
 

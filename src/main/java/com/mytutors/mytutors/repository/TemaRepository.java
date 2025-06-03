@@ -5,6 +5,10 @@ import com.mytutors.mytutors.model.Tema;
 import org.springframework.data.jpa.repository.EntityGraph;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+
 
 public interface TemaRepository extends JpaRepository<Tema, Long> {
     List<Tema> findByTutorId(Long idTutor);

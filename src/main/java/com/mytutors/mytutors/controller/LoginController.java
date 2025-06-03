@@ -39,7 +39,14 @@ public class LoginController {
         if (usuario != null && passwordEncoder.matches(password, usuario.getPassword())) {
             session.setAttribute("usuario", usuario);
             session.setAttribute("nombreUsuario", usuario.getNombre());
-            return "redirect:/home";
+
+            if("ADMIN".equals(usuario.getRolEnApp()))
+            {
+                return "redirect:/admin";
+            }else{
+                return "redirect:/home";
+            }
+
         }else
         {
             model.addAttribute("error", "Correo o contraseña incorrectos.");

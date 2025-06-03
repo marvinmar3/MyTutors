@@ -27,6 +27,8 @@ public class Usuario {
     @Column(name="ruta_foto")
     private String rutaFoto;
 
+    @Column(nullable = false)
+    private boolean activo= true;
 
     //getters y setters
 
@@ -95,5 +97,13 @@ public class Usuario {
 
     public void setRutaFoto(String rutaFoto) {
         this.rutaFoto = rutaFoto;
+    }
+
+    public boolean getActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }

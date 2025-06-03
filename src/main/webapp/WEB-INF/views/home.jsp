@@ -9,6 +9,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page session="true" %>
 <%@ page import="com.mytutors.mytutors.model.Usuario" %>
+
+
 <%
     Usuario usuario = (Usuario) session.getAttribute("usuario");
     if (usuario == null) {
@@ -29,9 +31,12 @@
 </head>
 <body>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
 <!-- Botón hamburguesa -->
 <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-<button class="btn-chat" onclick="cargarConversaciones()">💬 Mis Conversaciones</button>
+<button class="btn-chat" onclick="toggleChatPanel()">💬</button>
 
 <!-- Encabezado -->
 <header class="header">
@@ -72,12 +77,6 @@
             <option value="${m.nombre}">${m.nombre}</option>
         </c:forEach>
     </select>
-    <%--<select id="filtroTutor">
-        <option value="">-- Filtrar por tutor --</option>
-        <c:forEach var="t" items="${tutores}">
-            <option value="${t.nombre}">${t.nombre}</option>
-        </c:forEach>
-    </select>--%>
     <select id="filtroRol">
         <option value="">-- Filtrar por rol --</option>
         <option value="asignado">Ya tienen tutor</option>
@@ -156,160 +155,158 @@
                 </c:choose>
             </p>
 
-            <a href="${pageContext.request.contextPath}/temas/detalle?id=${tema.id}" class="btn-ver">Ver tema</a>
+            <a href="${pageContext.request.contextPath}/temas/ver?idTema=${tema.id}" class="btn-ver">Ver tema</a>
         </div>
     </c:forEach>
 </main>
 
-<!-- Panel de conversaciones -->
-<div id="panel-chats" class="hidden">
-    <h3>Mis Conversaciones</h3>
-    <ul id="lista-conversaciones">
-        <c:forEach var="conv" items="${conversaciones}">
-            <li onclick="abrirChat(${conv.id}, '${conv.nombre}')">
-                <span>${conv.nombre}</span>
-            </li>
-        </c:forEach>
-    </ul>
-</div>
+<!-- websoket y funcionalidad del  chat -->
 
-<!-- Ventana flotante de chat -->
-<div id="chat-window" class="hidden">
-    <div class="chat-header">
-        <span>Mensajes</span>
-        <button onclick="toggleChatWindow()">✖</button>
-    </div>
-    <div class="chat-body" id="chat-mensajes">
-        <!-- Aquí se renderizan los mensajes -->
-    </div>
-    <div class="chat-input">
-        <input type="text" id="mensajeInput" placeholder="Escribe un mensaje..." onkeypress="enviarSiEnter(event)">
-        <button onclick="enviarMensaje()">Enviar</button>
-    </div>
-</div>
-
-<!-- Scripts para abrir y cerrar ventanas -->
-<script>
-
-    function cargarConversaciones() {
-        // Hacemos la petición al backend
-        fetch("/mis-conversaciones")
-            .then(response => response.json())
-            .then(data => {
-                const lista = document.getElementById("lista-conversaciones");
-                lista.innerHTML = ""; // Limpiar la lista
-
-                if (data.length > 0) {
-                    data.forEach(conv => {
-                        const li = document.createElement("li");
-                        li.textContent = conv.nombre;
-                        li.onclick = () => abrirChat(conv.id, conv.nombre);
-                        lista.appendChild(li);
-                    });
-                    document.getElementById("panel-chats").classList.remove("hidden");
-                } else {
-                    console.log("No hay conversaciones");
-                }
-            })
-            .catch(error => {
-                console.error("Error al obtener conversaciones:", error);
-            });
-    }
-    function toggleChatPanel() {
-        const panel = document.getElementById("panel-chats");
-        if(panel) {
-            if (panel.classList.contains("hidden")) {
-                panel.style.display = "block";
-                panel.classList.remove("hidden");
-            } else {
-                panel.style.display = "none";
-                panel.classList.add("hidden");
-            }
-        }else{
-            console.error("No se encontró el panel de conversaciones");
-        }
-    }
-
-    function toggleChatWindow() {
-        const ventana = document.getElementById("chat-window");
-        ventana.classList.toggle("hidden");
-    }
-
-    function enviarSiEnter(e) {
-        if (e.key === "Enter") {
-            enviarMensaje();
-        }
-    }
-
-    function abrirChat(idConversacion, nombre) {
-        // Carga el nombre del chat
-        document.querySelector('.chat-header span').innerText = nombre;
-        idConversacionActiva = idConversacion;
-
-        // Llama al backend para obtener los mensajes
-        fetch(`/mensajes/${idConversacion}`)
-            .then(response => response.json())
-            .then(data => {
-                const chat = document.getElementById("chat-mensajes");
-                chat.innerHTML = "";
-                data.forEach(mensaje => {
-                    const div = document.createElement("div");
-                    div.innerText = mensaje.idEmisor + ": " + mensaje.contenido;
-                    chat.appendChild(div);
-                });
-            });
-
-        // Muestra la ventana flotante
-        document.getElementById("chat-window").classList.remove("hidden");
-    }
-</script>
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 
 <script>
     let stompClient = null;
-    let idConversacionActiva = null;
+    let idConversacionActual = null;
 
-    function conectar() {
-        const socket = new SockJS('/ws');
+    function conectarWebSocket(idConversacion) {
+        idConversacionActual = idConversacion;
+
+        const socket = new SockJS('/chat-websocket');
+
         stompClient = Stomp.over(socket);
-        stompClient.connect({}, function (frame) {
-            console.log("Conectado: " + frame);
 
-            if (idConversacionActiva) {
-                stompClient.subscribe(`/topic/mensajes/${idConversacionActiva}`, function (mensaje) {
-                    mostrarMensaje(JSON.parse(mensaje.body));
+        stompClient.connect({}, function (frame) {
+            console.log('✅ Conectado al WebSocket');
+
+            // Suscribirse al canal específico de la conversación
+            stompClient.subscribe('/topic/mensajes/' + idConversacion, function (mensaje) {
+                const msg = JSON.parse(mensaje.body);
+                mostrarMensaje(msg);
+            });
+
+            // Cargar mensajes anteriores vía jQuery
+            $.getJSON("/api/mensajes/"+ idConversacion, function(mensajes) {
+                if (!Array.isArray(mensajes)) {
+                    console.error("❌ Respuesta inválida del servidor:", mensajes);
+                    return;
+                }
+
+                const chat = document.getElementById(`chat-body-${idConversacion}`);
+                chat.innerHTML = ''; // Limpia contenido anterior
+
+                mensajes.forEach(m => {
+                    console.log("✅ mensaje cargado vía API:", m); // este es CLAVE
+                    mostrarMensajeChat(m, idConversacion);
                 });
+
+
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("❌ Error al obtener mensajes:", textStatus, errorThrown);
+            });
+        });
+    }
+
+
+
+    function mostrarMensajeChat(mensaje, idConversacion) {
+        const contenedor = document.getElementById(`chat-body-${idConversacion}`);
+        console.log("Contendor chat encontrado: ", contenedor);
+        if (!contenedor) {
+            console.warn(`❌ No se encontró chat-body-${idConversacion}`);
+            return;
+        }
+        const div = document.createElement("div");
+        div.classList.add("mensaje");
+
+        const horaFormateada = formatearHora(mensaje.fechaEnvio || new Date().toISOString());
+
+        if (parseInt(mensaje.idEmisor) === parseInt(usuarioIdGlobal)) {
+            div.classList.add("mensaje-propio");
+            div.innerHTML = `
+            <div class="contenido-mensaje">${mensaje.contenido}</div>
+            <div class="detalle-mensaje"><small>${horaFormateada}</small></div>
+        `;
+        } else {
+            div.classList.add("mensaje-ajeno");
+            div.innerHTML = `
+            <div class="contenido-mensaje">${mensaje.contenido}</div>
+            <div class="detalle-mensaje"><small><strong>${mensaje.nombreEmisor}</strong> · ${horaFormateada}</small></div>
+        `;
+        }
+        console.log("📦 Mostrando mensaje:", mensaje);
+
+        contenedor.appendChild(div);
+        contenedor.scrollTop=contenedor.scrollHeight;
+
+    }
+
+    function mostrarMensaje(msg){
+        console.log("📩 mensaje recibido por websocket: ",msg);
+        console.log("contenido: ", msg.contenido);
+        if(!msg || !msg.idConversacion || !msg.contenido) {
+            console.log.warm("‼️Mensaje invalido recibido", msg);
+            return;
+        }
+        if(!msg.contenido || msg.contenido.trim()===""){
+            console.warn("El mensaje no tiene contenido", msg);
+        }
+        console.log("📦Mensaje recibido: ", msg);
+
+        mostrarMensajeChat(msg, msg.idConversacion);
+    }
+
+
+    function enviarMensajeChat(idConversacion) {
+        const input = document.getElementById(`input-${idConversacion}`);
+        const contenido = input.value.trim();
+        if (!contenido) return;
+
+        const mensaje = {
+            idConversacion: idConversacion,
+            idEmisor: usuarioIdGlobal,
+            contenido: contenido,
+            fechaEnvio: new Date().toISOString()
+        };
+
+        $.ajax({
+            url: "/api/mensajes",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(mensaje),
+            success: function () {
+                input.value = "";
+                actualizarMensajes(idConversacion);
+            },
+            error: function (xhr, status, error) {
+                console.error("❌ Error al enviar mensaje:", error);
             }
         });
     }
 
-    function mostrarMensaje(mensaje) {
-        const chat = document.getElementById("chat-mensajes");
-        const div = document.createElement("div");
-        div.innerText = mensaje.idEmisor + ": " + mensaje.contenido;
-        chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight;
-    }
 
-    function enviarMensaje() {
-        const input = document.getElementById("mensajeInput");
-        const mensaje = input.value.trim();
-        if (mensaje !== "" && idConversacionActiva) {
-            stompClient.send("/app/chat.privado", {}, JSON.stringify({
-                contenido: mensaje,
-                idConversacion: idConversacionActiva,
-                idEmisor: ${usuario.id}
-            }));
-            input.value = "";
+    function cerrarChatMessenger(idConversacion) {
+        const ventana = document.getElementById(`chat-messenger-${idConversacion}`);
+        if (ventana) {
+            ventana.remove();
         }
+
+        //detener el setinterval asociado
+        const index = ventanasAbiertas.findIndex(v => v.id === idConversacion);
+        if (index !== -1) {
+            clearInterval(ventanasAbiertas[index].intervalId);
+            ventanasAbiertas.splice(index, 1);
+        }
+
     }
 
-    window.addEventListener("load", conectar);
+
+    function enviarSiEnter(e) {
+        if (e.key === "Enter") enviarMensajeChat();
+    }
 </script>
 
-
-
+<!-- filtros -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const filtros = {
@@ -365,6 +362,192 @@
         filtrar(); // Mostrar todo al inicio
     });
 </script>
+
+<!--este se queda en Home si es que se llega a migrar -->
+<script>
+    var usuarioIdGlobal = ${usuario.id};
+</script>
+<!-- Panel flotante de conversaciones -->
+<div id="panel-conversaciones" class="chat-panel hidden">
+    <div class="chat-panel-header">
+        <input type="text" id="buscarConversacion" placeholder="Buscar conversaciones..." />
+    </div>
+    <div class="chat-lista" id="listaConversaciones">
+        <!-- Se carga dinámicamente -->
+    </div>
+</div>
+
+<script>
+    function toggleChatPanel() {
+        const panel = document.getElementById("panel-conversaciones");
+        panel.classList.toggle("hidden");
+        if (!panel.classList.contains("loaded")) {
+            cargarConversaciones();
+            panel.classList.add("loaded");
+        }
+    }
+
+    function cargarConversaciones() {
+        $.getJSON("/mis-conversaciones", function (data) {
+            const contenedor = document.getElementById("listaConversaciones");
+            contenedor.innerHTML = "";
+
+            if (data.length === 0) {
+                contenedor.innerHTML = "<p style='padding:10px;'>No tienes conversaciones.</p>";
+                return;
+            }
+
+            data.forEach(conv => {
+                console.log("👉 Conversación cargada:", conv);
+
+                const nombreValido = conv.nombre && typeof conv.nombre === 'string' && conv.nombre !== "false";
+                const nombreMostrado = nombreValido ? conv.nombre : "Desconocido";
+
+                const item = document.createElement("div");
+                item.className = "chat-item";
+                item.onclick = () => abrirChatMessenger(conv.id, nombreMostrado);
+
+                const img = document.createElement("img");
+                img.src = conv.avatar && typeof conv.avatar === 'string' && conv.avatar !== "false"
+                    ? conv.avatar
+                    : "/img/default-user.jpeg";
+
+                const info = document.createElement("div");
+                info.className = "chat-info";
+
+                const mensajeMostrado = conv.ultimoMensaje ? conv.ultimoMensaje : "Sin mensajes";
+
+                const fecha = conv.fechaUltimoMensaje ? new Date(conv.fechaUltimoMensaje) : null;
+                const horaMostrada = fecha ? fecha.toLocaleTimeString("es-MX", { hour: '2-digit', minute: '2-digit' }) : "";
+
+
+
+
+                info.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong>${nombreMostrado}</strong>
+                        <small class="hora" style="font-size: 11px; color: #999;">${horaMostrada}</small>
+                    </div>
+                    <p style="font-size: 12px; color: gray;">${mensajeMostrado}</p>
+                `;
+
+
+
+                item.appendChild(img);
+                item.appendChild(info);
+                contenedor.appendChild(item);
+            });
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            console.error("❌ Error al cargar conversaciones:", textStatus, errorThrown);
+        });
+    }
+
+    function formatearHora(fechaIso){
+        if (!fechaIso) return "";
+        const fecha = new Date(fechaIso);
+        return fecha.toLocaleTimeString("es-MX", {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    function formatearFecha(fechaIso) {
+        if (!fechaIso) return "";
+        const fecha = new Date(fechaIso);
+        return fecha.toLocaleString("es-MX", {
+            hour: '2-digit',
+            minute: '2-digit',
+            day: '2-digit',
+            month: 'short'
+        });
+    }
+
+    const ventanasAbiertas = [];
+
+    function abrirChatMessenger(idConversacion, nombre) {
+        if(!idConversacion || isNaN(idConversacion)){
+            console.error("ID de conversacion inválido: ", idConversacion);
+            return;
+        }
+        // Verifica si ya está abierto
+        if (document.getElementById(`chat-messenger-${idConversacion}`)) return;
+
+        const contenedor = document.getElementById("ventanas-messenger-container");
+
+        const div = document.createElement("div");
+        div.className = "ventana-chat";
+        div.id = `chat-messenger-${idConversacion}`;
+
+        const index = ventanasAbiertas.length;
+        const spacing = 320;
+        const offsetRight = 20 + (index * spacing);
+        div.style.right = `${offsetRight}px`;
+
+        div.innerHTML = `
+            <div class="chat-top-bar">
+                <span><strong>${nombre}</strong></span>
+                <button onclick="cerrarChatMessenger(${idConversacion})">✖</button>
+            </div>
+            <div class="chat-body" id="chat-body-${idConversacion}">Cargando mensajes...</div>
+            <div class="chat-footer">
+                <input type="text" id="input-${idConversacion}" placeholder="Escribe...">
+                <button onclick="enviarMensajeChat(${idConversacion})">Enviar</button>
+            </div>
+        `;
+
+        contenedor.appendChild(div);
+
+        conectarWebSocket(idConversacion);
+
+        //cargar los mensajes inicialmenente
+        actualizarMensajes(idConversacion);
+
+        //establecer polling con setInterval
+        const intervalId = setInterval(() => {
+            console.log("⏱️ Ejecutando actualizarMensajes para ID: ", idConversacion);
+            if (!idConversacion || isNaN(idConversacion)) {
+                console.warn("⚠️ ID de conversacion inválido en polling:", idConversacion);
+                return;
+            }
+            actualizarMensajes(idConversacion);
+        }, 2000);
+        ventanasAbiertas.push({ id: idConversacion, dom: div, intervalId });
+
+
+    }
+    const ultimoMensajePorConversacion={};
+
+    function actualizarMensajes(idConversacion){
+        if(!idConversacion || isNaN(idConversacion)){
+            console.warn("❌ID de conversacion inválido en polling: ",idConversacion);
+            return;
+        }
+        console.log("🔁 Ejecutando actualizarMensajes para ID:", idConversacion);
+
+        $.getJSON("/api/mensajes/" + idConversacion, function (mensajes) {
+            console.log("📨 Respuesta del servidor:", mensajes);
+            console.log("ID de la conversacion: ", idConversacion);
+            const contenedor = document.getElementById(`chat-body-${idConversacion}`);
+            if(!contenedor) return;
+
+            const ultimoIdMostrado= ultimoMensajePorConversacion[idConversacion] || -1;
+
+            contenedor.innerHTML = '';
+
+            mensajes.forEach(m => {
+                mostrarMensajeChat(m, idConversacion);
+                ultimoMensajePorConversacion[idConversacion]= m.id;
+            });
+        }).fail(function () {
+            console.error("❌ Error al cargar mensajes por polling.");
+        });
+
+    }
+
+</script>
+
+<!-- Contenedor de ventanas flotantes tipo Messenger -->
+<div id="ventanas-messenger-container" style="position: fixed; bottom: 0; right: 0; display: flex; flex-direction: row-reverse; gap: 20px; z-index: 2000;"></div>
 
 </body>
 </html>

@@ -82,6 +82,7 @@ public class TemaController {
             materia = new Materia();
             materia.setNombre(nuevaMateria.trim());
             materia.setCarrera(carrera);
+            materia.setFacultad(carrera.getFacultad());
             materiaRepository.save(materia);
         } else {
             try {
@@ -162,7 +163,11 @@ public class TemaController {
     }
 
     @GetMapping("/ver")
-    public String verTema(@RequestParam Long idTema, Model model, HttpSession session) {
+    public String verTema(@RequestParam ("idTema") Long idTema, Model model, HttpSession session) {
+
+        if(idTema == null) {
+            return "redirect:/home";
+        }
         Tema tema = temaRepository.findById(idTema).orElse(null);
         Usuario usuario = (Usuario) session.getAttribute("usuario");
 

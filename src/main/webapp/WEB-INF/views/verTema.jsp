@@ -34,20 +34,20 @@
                 </c:choose>
             </p>
 
-            <p><strong>Tutorado:</strong>
-                <c:choose>
-                    <c:when test="${tema.tutorado != null}">
-                        ${tema.tutorado.nombre}
-                    </c:when>
-                    <c:otherwise>
-                        Sin asignar
-                    </c:otherwise>
-                </c:choose>
-            </p>
+<%--            <p><strong>Tutorado:</strong>--%>
+<%--                <c:choose>--%>
+<%--                    <c:when test="${tema.tutorado != null}">--%>
+<%--                        ${tema.tutorado.nombre}--%>
+<%--                    </c:when>--%>
+<%--                    <c:otherwise>--%>
+<%--                        Sin asignar--%>
+<%--                    </c:otherwise>--%>
+<%--                </c:choose>--%>
+<%--            </p>--%>
 
             <p><strong>Estado:</strong>
                 <c:choose>
-                    <c:when test="${tema.tutor != null && tema.tutorado != null}">
+                    <c:when test="${tema.tutor != null }"> <!-- && tema.tutorado != null -->
                         En curso
                     </c:when>
                     <c:otherwise>

@@ -20,10 +20,10 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String ruta = Paths.get(System.getProperty("user.home"), "mytutors/uploads/img/usuarios").toUri().toString();
-
+        String ruta = System.getProperty("user.home") + "/mytutors/uploads/img/usuarios/";
         registry.addResourceHandler("/imagenes/**")
-                .addResourceLocations(ruta);
+                .addResourceLocations("file:" + ruta);
     }
+
 
 }

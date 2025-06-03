@@ -24,6 +24,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 usuario.getPassword(),
                 Collections.singletonList(() -> "ROLE_USER") // o usa roles de tu BD si los tienes
         );
+
     }
+
 }
 
