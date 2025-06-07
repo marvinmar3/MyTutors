@@ -25,8 +25,8 @@
 
       <form action="${pageContext.request.contextPath}/login" method="post">
         <input type="email" name="correo" placeholder="Correo institucional" required
-               pattern="^[a-zA-Z0-9._%+-]+@estudiantes\\.uv\\.mx$"
-               title="Debe ser un correo institucional válido (@estudiantes.uv.mx)">
+<%--               pattern="^[\\w.-]+@estudiantes\\.uv\\.mx$"--%>
+               title="Ingresa tu correo institucional.">
         <input type="password" name="password" placeholder="Contraseña" required>
         <button type="submit">Ingresar</button>
       </form>

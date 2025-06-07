@@ -77,7 +77,7 @@
             <option value="${m.nombre}">${m.nombre}</option>
         </c:forEach>
     </select>
-    <select id="filtroRol">
+    <select id="filtroRol", autocomplete="off">
         <option value="">-- Filtrar por rol --</option>
         <option value="asignado">Ya tienen tutor</option>
         <option value="disponible">Sin tutor</option>
@@ -94,7 +94,7 @@
             <option value="${c.nombre}">${c.nombre}</option>
         </c:forEach>
     </select>
-    <label><input type="checkbox" id="filtroSinTutor"> Sin tutor</label>
+    <label><input type="checkbox" id="filtroSinTutor", autocomplete="off"> Sin tutor</label>
 </div>
 
 

@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilos.css">
 </head>
 <body>
+
+
   <h1>📚MyTutors📚</h1>
   <div class="typewriter-container">
       <p class="typewriter">Porque aprender también es ayudar: descubre tu tutor ideal.</p>
@@ -23,5 +25,25 @@
       <a href="${pageContext.request.contextPath}/login" class="btn">Iniciar Sesión</a>
       <a href="${pageContext.request.contextPath}/registro" class="btn">Registrarse</a>
   </div>
+
+<%--<section class="info-seccion">--%>
+<%--    <div class="info-bloque">--%>
+<%--        <h2>Nuestro Objetivo</h2>--%>
+<%--        <p>Mytutors busca conectar a estudiantes y profesores de la Universidad Veracruzana en--%>
+<%--        un entorno colaborativo de enseñanza.</p>--%>
+<%--    </div>--%>
+<%--    <div class="info-bloque">--%>
+<%--        <h2>¿Para quién es?</h2>--%>
+<%--        <p>Está diseñado para alumnos que necesitan reforsar conocimientos, y docentes que deseen compartir tutorias adicionales.</p>--%>
+<%--    </div>--%>
+<%--    <div class="info-bloque">--%>
+<%--        <h2>¿Que puedes hacer?</h2>--%>
+<%--        <p>Ofrece o recibe tutorias, administra tus cursos, chatea con otros usuarios y potencia tu aprendizaje.</p>--%>
+<%--    </div>--%>
+<%--</section>--%>
+
+
+
+
 </body>
 </html>

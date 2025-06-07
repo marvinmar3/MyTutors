@@ -68,6 +68,8 @@
       <br/>
       <br>
       <button type="submit" class="btn btn-success">Crear</button>
+      <br>
+      <button type="button", class="btn btn-danger" onclick="window.location.href='${pageContext.request.contextPath}/home'">Cancelar</button>
     </form>
   </div>
   <c:if test="${not empty success}">
@@ -123,99 +125,6 @@
       });
     });
   </script>
-
-
-  <%--  <script>
-    function agregarListenersEncadenamiento() {
-      const facultadSelect = document.getElementById("facultad");
-      const carreraSelect = document.getElementById("carrera");
-      const materiaSelect = document.getElementById("materia");
-      const divNueva = document.getElementById("materiaNuevaDiv");
-      const nuevaMateriaInput = document.getElementById("nuevaMateria");
-
-      let ultimaFacultad = null;
-
-      facultadSelect.addEventListener("change", function () {
-        const idFacultad = Number(this.value);
-
-        console.log("🔍 Facultad seleccionada:", idFacultad);
-
-        if (!idFacultad || isNaN(idFacultad) || idFacultad <= 0 || idFacultad === ultimaFacultad) {
-          console.warn("⚠️ Facultad no válida o ya procesada:", idFacultad);
-          return;
-        }
-
-        ultimaFacultad = idFacultad;
-
-        carreraSelect.innerHTML = '<option value="">Cargando carreras...</option>';
-        materiaSelect.innerHTML = '<option value="">Selecciona una materia</option>';
-
-        // ✅ Aquí está bien interpolado
-        fetch(`/temas/carreras?idFacultad=${idFacultad}`)
-                .then(resp => resp.json())
-                .then(data => {
-                  carreraSelect.innerHTML = '<option value="">Selecciona una carrera</option>';
-
-                  if (!Array.isArray(data)) {
-                    console.error("❌ Respuesta de carreras no es un arreglo:", data);
-                    return;
-                  }
-
-                  data.forEach(c => {
-                    const opt = document.createElement("option");
-                    opt.value = c.id;
-                    opt.textContent = c.nombre;
-                    carreraSelect.appendChild(opt);
-                  });
-                })
-                .catch(err => {
-                  console.error("❌ Error cargando carreras:", err);
-                });
-      });
-
-      carreraSelect.addEventListener("change", function () {
-        const idCarrera = this.value;
-
-        if (!idCarrera) {
-          materiaSelect.innerHTML = '<option value="">Selecciona una materia</option>';
-          return;
-        }
-
-        materiaSelect.innerHTML = '<option value="">Cargando materias...</option>';
-
-        fetch(`/temas/materias?id_carrera=${idCarrera}`)
-                .then(resp => resp.json())
-                .then(data => {
-                  materiaSelect.innerHTML = '<option value="">Selecciona una materia</option>';
-
-                  data.forEach(m => {
-                    const opt = document.createElement("option");
-                    opt.value = m.id;
-                    opt.textContent = m.nombre;
-                    materiaSelect.appendChild(opt);
-                  });
-
-                  const otra = document.createElement("option");
-                  otra.value = "otra";
-                  otra.textContent = "Otra...";
-                  materiaSelect.appendChild(otra);
-                })
-                .catch(err => console.error("Error cargando materias:", err));
-      });
-
-      materiaSelect.addEventListener("change", function () {
-        if (this.value === "otra") {
-          divNueva.style.display = "block";
-          nuevaMateriaInput.required = true;
-        } else {
-          divNueva.style.display = "none";
-          nuevaMateriaInput.required = false;
-        }
-      });
-    }
-
-    window.addEventListener("DOMContentLoaded", agregarListenersEncadenamiento);
-  </script>--%>
 
 </body>
 </html>

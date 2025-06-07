@@ -15,8 +15,14 @@
     <script>
         function mostrarFormularioEdicion()
         {
-            document.getElementById('form-editar').style.display='block';
-            document.getElementById('modo-lectura').style.display='none';
+            const formEditar = document.getElementById('form-editar');
+            const modoLectura = document.getElementById('modo-lectura');
+
+            formEditar.style.visibility = 'visible';
+            formEditar.style.height = 'auto';
+            formEditar.style.overflow = 'visible';
+
+            modoLectura.style.display = 'none';
         }
     </script>
 </head>
@@ -65,7 +71,7 @@
     </div>
 
 
-    <div id="form-editar" style="display: none">
+    <div id="form-editar" style="visibility: hidden; height: 0; overflow: hidden">
 
         <form method="post" action="${pageContext.request.contextPath}/perfil/actualizar" enctype="multipart/form-data">
             <label>Nombre completo:</label>
