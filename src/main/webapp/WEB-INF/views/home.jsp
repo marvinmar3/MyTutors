@@ -20,7 +20,7 @@
 %>
 <html>
 <head>
-    <title>Inicio | MyTutors</title>
+    <title>MyTutors</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
@@ -28,6 +28,13 @@
             document.getElementById('sidebar').classList.toggle('sidebar-open');
         }
     </script>
+
+    <!-- Ícono para iOS (pantalla de inicio) -->
+    <link rel="apple-touch-icon" sizes="192x192" href="${pageContext.request.contextPath}/img/logo.png">
+
+    <!-- Ícono general (favicon) -->
+    <link rel="icon" type="image/png" sizes="192x192" href="${pageContext.request.contextPath}/img/logo.png">
+
 </head>
 <body>
 

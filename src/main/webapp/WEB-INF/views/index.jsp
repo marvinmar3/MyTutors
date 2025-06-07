@@ -12,6 +12,13 @@
     <meta charset="UTF-8">
     <title>MyTutors</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilos.css">
+
+    <!-- Ícono para iOS (pantalla de inicio) -->
+    <link rel="apple-touch-icon" sizes="192x192" href="${pageContext.request.contextPath}/img/logo.png">
+
+    <!-- Ícono general (favicon) -->
+    <link rel="icon" type="image/png" sizes="192x192" href="${pageContext.request.contextPath}/img/logo.png">
+
 </head>
 <body>
 
