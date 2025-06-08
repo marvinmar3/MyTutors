@@ -1,9 +1,11 @@
 package com.mytutors.mytutors.controller;
 
+import com.mytutors.mytutors.dto.SolicitudNotificacionDTO;
 import com.mytutors.mytutors.model.Usuario;
 import com.mytutors.mytutors.repository.CarreraRepository;
 import com.mytutors.mytutors.repository.FacultadRepository;
 import com.mytutors.mytutors.repository.MateriaRepository;
+import com.mytutors.mytutors.service.SolicitudTutoriaService;
 import com.mytutors.mytutors.service.UsuarioService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,8 @@ public class HomeController {
 
     @Autowired
     private CarreraRepository carreraRepository;
+    @Autowired
+    private SolicitudTutoriaService solicitudTutoriaService;
 
     public HomeController(UsuarioService usuarioService, TemaService temaService) {
         this.usuarioService = usuarioService;
@@ -51,7 +55,9 @@ public class HomeController {
         model.addAttribute("carreras", carreraRepository.findAll());
         model.addAttribute("facultades", facultadRepository.findAll());
 
-        //List<Tema> temas = temaService.obtenerTemas();
+        List<SolicitudNotificacionDTO> notificaciones = solicitudTutoriaService.obtenerSolicitudesDTO(usuario.getId());
+        model.addAttribute("notificaciones", notificaciones);
+
         return "home";
     }
 

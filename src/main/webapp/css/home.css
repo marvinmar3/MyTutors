@@ -501,3 +501,74 @@ nuevoTema
     color: gray;
     float: right;
 }
+
+/*panel de notificaciones*/
+#panelNotificaciones{
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    width: 350px;
+    max-height: 80vh;
+    background: rgba(255, 255,255,0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 1000;
+    padding: 1rem;
+    overflow-y: auto;
+    animation: slideIn 0.4s ease-in-out;
+    color: white;
+}
+
+.btn-notificaciones {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #118acb;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 15px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+
+@keyframes slideIn {
+    from{
+        opacity: 0;
+        transform: translateY(0);
+    }
+}
+
+/*boton para solicitar ser tutor/tutorado*/
+.btn-solicitar {
+    background-color: #198754;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    margin-top: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+}
+
+.mensaje-exito {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+    padding: 12px;
+    margin: 10px auto;
+    border-radius: 10px;
+    width: 90%;
+    text-align: center;
+}
+
+.mensaje-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    margin: 1rem;
+    border-radius: 10px;
+}

@@ -7,8 +7,10 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page session="true" %>
 <%@ page import="com.mytutors.mytutors.model.Usuario" %>
+<c:remove var="mensajes" />
 
 
 <%
@@ -66,12 +68,13 @@
             <p><strong>${nombreUsuario}</strong></p>
         </div>
         <nav class="sidebar-nav">
-            <a href="${pageContext.request.contextPath}/perfil">Mi perfil</a>
-            <a href="${pageContext.request.contextPath}/aprendizaje">Mi aprendizaje</a>
-            <a href="${pageContext.request.contextPath}/grupos">Mis grupos</a>
+            <a href="${pageContext.request.contextPath}/perfil">👤 Mi perfil</a>
+            <a href="${pageContext.request.contextPath}/aprendizaje">🏆 Mi aprendizaje</a>
+<%--            <a href="${pageContext.request.contextPath}/grupos">👥 Mis grupos</a>--%>
             <a href="${pageContext.request.contextPath}/temas/nuevo">➕ Crear tutoría</a>
-            <a href="${pageContext.request.contextPath}/configuracion">Configuración</a>
-            <a href="${pageContext.request.contextPath}/logout" class="logout">Cerrar sesión</a>
+            <a href="javascript:void(0);" onclick="toggleNotificaciones()">🔔 Notificaciones</a>
+            <a href="${pageContext.request.contextPath}/configuracion">⚙️ Configuración</a>
+            <a href="${pageContext.request.contextPath}/logout" class="logout">⬅ Cerrar sesión</a>
         </nav>
     </div>
 </c:if>
@@ -104,7 +107,9 @@
     <label><input type="checkbox" id="filtroSinTutor", autocomplete="off"> Sin tutor</label>
 </div>
 
-
+<c:if test="${not empty mensajeFlash}">
+    <div class="mensaje-exito">${mensajeFlash}</div>
+</c:if>
 
 <!-- Tarjetas de temas -->
 <main class="usuarios-container">
@@ -163,6 +168,18 @@
             </p>
 
             <a href="${pageContext.request.contextPath}/temas/ver?idTema=${tema.id}" class="btn-ver">Ver tema</a>
+
+            <c:if test="${empty tema.tutor
+             and tema.creador.id ne usuario.id
+             and ((tema.rol == 'tutor' and (usuario.rolEnApp == 'tutorado' or usuario.rolEnApp == 'ambos'))
+                  or (tema.rol == 'tutorado' and (usuario.rolEnApp == 'tutor' or usuario.rolEnApp == 'ambos')))}">
+                <form action="${pageContext.request.contextPath}/solicitudes/enviar" method="post">
+                    <input type="hidden" name="idTema" value="${tema.id}" />
+                    <button type="submit" class="btn-solicitar">Solicitar tutoría</button>
+                </form>
+            </c:if>
+
+
         </div>
     </c:forEach>
 </main>
@@ -556,5 +573,42 @@
 <!-- Contenedor de ventanas flotantes tipo Messenger -->
 <div id="ventanas-messenger-container" style="position: fixed; bottom: 0; right: 0; display: flex; flex-direction: row-reverse; gap: 20px; z-index: 2000;"></div>
 
+
+<!-- notificaciones-->
+<!-- notificaciones-->
+<div id="panelNotificaciones" style="display: none;">
+    <h3>Notificaciones</h3>
+
+    <c:choose>
+        <c:when test="${empty notificaciones}">
+            <p>No tienes notificaciones nuevas.</p>
+        </c:when>
+        <c:otherwise>
+            <c:forEach var="noti" items="${notificaciones}">
+                <div class="notificacion">
+                    <p><strong>Solicitud recibida</strong> para el tema: ${noti.nombreTema}</p>
+                    <p>Solicitante: ${noti.nombreSolicitante}</p>
+                    <p>Fecha: ${noti.fechaFormateada}</p>
+                    <form action="${pageContext.request.contextPath}/api/notificaciones/aceptar/${noti.id}" method="post" style="display:inline;">
+                        <button type="submit">✅ Aceptar</button>
+                    </form>
+
+                    <form action="${pageContext.request.contextPath}/api/notificaciones/rechazar/${noti.id}" method="post" style="display:inline;">
+                        <button type="submit">❌ Rechazar</button>
+                    </form>
+                    <hr/>
+                </div>
+            </c:forEach>
+        </c:otherwise>
+    </c:choose>
+</div>
+
+<script>
+    function toggleNotificaciones() {
+        const panel = document.getElementById("panelNotificaciones");
+        panel.style.display = (panel.style.display === "none") ? "block" : "none";
+
+    }
+</script>
 </body>
 </html>
