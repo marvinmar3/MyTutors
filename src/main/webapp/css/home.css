@@ -606,3 +606,63 @@ nuevoTema
     color: #721c24;
 }
 
+.footer {
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 1.5rem;
+    text-align: center;
+    color: #ccc;
+    font-size: 0.95rem;
+    margin-top: 3rem;
+    backdrop-filter: blur(6px);
+}
+
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 1rem;
+}
+
+.footer-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+    color: #ccc;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.footer-tooltip:hover {
+    color: #fff;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    width: 280px;
+    background-color: #1c1c1c;
+    color: #eee;
+    text-align: left;
+    padding: 0.9rem;
+    border-radius: 8px;
+    position: absolute;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+    font-size: 0.85rem;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.footer-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+
+.footer-copy {
+    font-size: 0.85rem;
+    color: #aaa;
+}
+

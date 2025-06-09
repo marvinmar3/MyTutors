@@ -9,24 +9,26 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <jsp:useBean id="now" class="java.util.Date" scope="page" />
+<jsp:useBean id="usuarioSesion" class="com.mytutors.mytutors.model.Usuario" scope="session" />
 
 <html>
 <head>
   <title>Mis Aprendizajes</title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css">
-  <style>
-    .completo {
-      background-color: #dbeafe; /* azul claro */
-      border: 1px solid #3b82f6;
-    }
-  </style>
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/aprendizaje.css">
 </head>
+
 <body class="dark-bg">
-<h1 style="text-align:center;">Mis aprendizajes</h1>
+
+<header>
+  <a href="${pageContext.request.contextPath}/home" class="btn-volver">← Volver a inicio</a>
+  <h1 class="titulo-aprendizaje">Mis Aprendizajes</h1>
+  <span style="width:130px;"></span>
+</header>
 
 <main class="usuarios-container">
   <c:if test="${empty aprendizajes}">
-    <p style="color: #118acb; text-align: center;">⚠️ No tienes aprendizajes asignados todavía.</p>
+    <p class="mensaje-vacio">⚠️ No tienes aprendizajes asignados todavía.</p>
   </c:if>
 
   <c:forEach var="vista" items="${aprendizajes}">
@@ -37,7 +39,6 @@
 
     <div class="tarjeta-usuario ${esCompleto ? 'completo' : ''}">
 
-      <!-- Imagen del tutor si existe -->
       <c:choose>
         <c:when test="${not empty tutor and not empty tutor.rutaFoto}">
           <img class="foto-perfil" src="${pageContext.request.contextPath}${tutor.rutaFoto}?v=${now.time}" alt="Foto del tutor">
@@ -51,9 +52,7 @@
 
       <p><strong>Materia:</strong>
         <c:choose>
-          <c:when test="${not empty tema.materia}">
-            ${tema.materia.nombre}
-          </c:when>
+          <c:when test="${not empty tema.materia}">${tema.materia.nombre}</c:when>
           <c:otherwise><em>Sin asignar</em></c:otherwise>
         </c:choose>
       </p>
@@ -62,23 +61,30 @@
 
       <p><strong>Tutor:</strong>
         <c:choose>
-          <c:when test="${not empty tutor}">
-            ${tutor.nombre}
-          </c:when>
+          <c:when test="${not empty tutor}">${tutor.nombre}</c:when>
           <c:otherwise>No asignado</c:otherwise>
         </c:choose>
       </p>
 
       <p><strong>Tutorado:</strong>
         <c:choose>
-          <c:when test="${not empty tutorado}">
-            ${tutorado.nombre}
-          </c:when>
+          <c:when test="${not empty tutorado}">${tutorado.nombre}</c:when>
           <c:otherwise>No asignado</c:otherwise>
         </c:choose>
       </p>
 
-      <a href="${pageContext.request.contextPath}/temas/ver?idTema=${tema.id}" class="btn-ver">Ver tema</a>
+      <a href="${pageContext.request.contextPath}/temas/ver?idTema=${tema.id}&origen=aprendizaje" class="btn-ver">Ver tema</a>
+
+      <c:if test="${esCompleto and (usuarioSesion.id == tutor.id or usuarioSesion.id == tutorado.id)}">
+        <c:choose>
+          <c:when test="${usuarioSesion.id == tutorado.id}">
+            <a href="${pageContext.request.contextPath}/chat/tema/${tema.id}" class="btn-chat">Conversar con el tutor</a>
+          </c:when>
+          <c:when test="${usuarioSesion.id == tutor.id}">
+            <a href="${pageContext.request.contextPath}/chat/tema/${tema.id}" class="btn-chat">Conversar con el tutorado</a>
+          </c:when>
+        </c:choose>
+      </c:if>
     </div>
   </c:forEach>
 </main>

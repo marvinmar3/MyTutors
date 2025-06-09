@@ -164,26 +164,56 @@ public class TemaController {
     }
 
     @GetMapping("/ver")
-    public String verTema(@RequestParam ("idTema") Long idTema, Model model, HttpSession session) {
+    public String verTema(@RequestParam("idTema") Long idTema,
+                          @RequestParam(value = "origen", required = false) String origen,
+                          Model model, HttpSession session) {
 
-        if(idTema == null) {
+        if (idTema == null) {
             return "redirect:/home";
         }
+
         Tema tema = temaRepository.findById(idTema).orElse(null);
         Usuario usuario = (Usuario) session.getAttribute("usuario");
 
-        if(tema!=null) {
+        if (tema != null) {
             model.addAttribute("tema", tema);
             model.addAttribute("usuario", usuario);
 
-            boolean match =(tema.getTutor()!=null && tema.getTutor().getId().equals(usuario.getId())) ||
-                    (tema.getCreador()!= null && tema.getCreador().getId().equals(usuario.getId()));
+            String origenFinal = (origen != null) ? origen : "";
 
-            model.addAttribute("match", match);
+            boolean esCompleto = tema.getTutor() != null && tema.getCreador() != null;
+            boolean usuarioEsParte = (tema.getTutor() != null && tema.getTutor().getId().equals(usuario.getId()))
+                    || (tema.getCreador() != null && tema.getCreador().getId().equals(usuario.getId()));
+            boolean puedeChatear = "aprendizaje".equals(origenFinal) && esCompleto && usuarioEsParte;
+
+            model.addAttribute("puedeChatear", puedeChatear);
+            String rolUsuario = "tutorado";
+            if (tema.getTutor() != null && usuario.getId().equals(tema.getTutor().getId())) {
+                rolUsuario = "tutor";
+            }
+            model.addAttribute("rolUsuario", rolUsuario);
+
+            model.addAttribute("origen", origenFinal); // se agrega para que el JSP sepa desde dónde vino
+
+            // Logs para depuración
+            System.out.println("ORIGEN FINAL: " + origenFinal);
+            System.out.println("TEMA: " + tema.getNombre());
+            System.out.println("ES COMPLETO: " + esCompleto);
+            System.out.println("USUARIO ES PARTE: " + usuarioEsParte);
+            System.out.println("PUEDE CHATEAR: " + puedeChatear);
+            if (tema.getTutor() != null) {
+                System.out.println("ROL USUARIO: " + (tema.getTutor().getId().equals(usuario.getId()) ? "tutor" : "tutorado"));
+            } else {
+                System.out.println("ROL USUARIO: tutor null → se asume tutorado");
+            }
+
+
             return "verTema";
         }
+
         return "redirect:/home";
     }
+
 
     @GetMapping("/nuevo")
     public String mostrarFormNuevoTema(Model model, HttpSession session) {

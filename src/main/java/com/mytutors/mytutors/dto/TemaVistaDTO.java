@@ -18,6 +18,11 @@ public class TemaVistaDTO {
             this.tutor = tema.getTutor();           // el creador fue el tutor
             this.tutorado = tema.getCreador();      // se asigna al aceptar
         }
+
+        System.out.println("Tema: " + tema.getNombre());
+        System.out.println("Rol: " + tema.getRol());
+        System.out.println("Tutor: " + (tutor != null ? tutor.getNombre() : "null"));
+        System.out.println("Tutorado: " + (tutorado != null ? tutorado.getNombre() : "null"));
     }
 
     public Tema getTema() {

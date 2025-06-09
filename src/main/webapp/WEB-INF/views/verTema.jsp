@@ -45,11 +45,26 @@
                 </c:choose>
             </p>
 
-            <c:if test="${match}">
-                <a class="btn-chat" href="/chat/tema/${tema.id}">Ir al chat del tema</a>
+            <c:if test="${puedeChatear}">
+                <c:choose>
+                    <c:when test="${rolUsuario == 'tutor'}">
+                        <a class="btn-chat" href="/chat/tema/${tema.id}">Conversar con el tutorado</a>
+                    </c:when>
+                    <c:otherwise>
+                        <a class="btn-chat" href="/chat/tema/${tema.id}">Conversar con el tutor</a>
+                    </c:otherwise>
+                </c:choose>
             </c:if>
 
-            <a href="/home" class="btn-volver">← Volver a inicio</a>
+            <c:choose>
+                <c:when test="${origen == 'aprendizaje'}">
+                    <a href="${pageContext.request.contextPath}/temas/aprendizaje" class="btn-volver">← Volver a aprendizajes</a>
+                </c:when>
+                <c:otherwise>
+                    <a href="${pageContext.request.contextPath}/home" class="btn-volver">← Volver a inicio</a>
+                </c:otherwise>
+            </c:choose>
+
         </div>
     </div>
 </body>

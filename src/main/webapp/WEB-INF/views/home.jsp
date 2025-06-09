@@ -178,7 +178,7 @@
                 </c:choose>
             </p>
 
-            <a href="${pageContext.request.contextPath}/temas/ver?idTema=${tema.id}" class="btn-ver">Ver tema</a>
+            <a href="${pageContext.request.contextPath}/temas/ver?idTema=${tema.id}&origen=home" class="btn-ver">Ver tema</a>
 
             <c:choose>
                 <c:when test="${tema.rol == 'tutor'
@@ -210,6 +210,46 @@
         </div>
     </c:forEach>
 </main>
+
+<!-- pie de pagina-->
+<footer class="footer">
+    <div class="footer-links">
+
+    <span class="footer-tooltip">
+      📄 Condiciones de uso
+      <div class="tooltip-text">
+        El uso de MyTutors está limitado a fines académicos. No está permitido el uso indebido de los datos ni el contacto fuera del contexto educativo. Usuarios que incumplan serán bloqueados.
+      </div>
+    </span>
+
+        <span class="footer-tooltip">
+      🔒 Privacidad
+      <div class="tooltip-text">
+        Recolectamos datos como nombre, carrera, foto de perfil y correo institucional únicamente para gestionar tu participación en tutorías. No compartimos tu información con terceros.
+      </div>
+    </span>
+
+        <span class="footer-tooltip">
+      📘 Acerca de
+      <div class="tooltip-text">
+        MyTutors es una plataforma de tutorías entre alumnos, egresados y profesores de la Universidad Veracruzana. Promueve el aprendizaje colaborativo y el fortalecimiento académico.
+      </div>
+    </span>
+
+        <span class="footer-tooltip">
+      🛡️ Seguridad
+      <div class="tooltip-text">
+        Las contraseñas están cifradas con algoritmos seguros (BCrypt). Solo los usuarios autenticados pueden acceder a las funciones de la plataforma. No almacenamos contraseñas en texto plano.
+      </div>
+    </span>
+
+    </div>
+
+    <div class="footer-copy">
+        © 2025 MyTutors – Universidad Veracruzana
+    </div>
+</footer>
+
 
 <!-- websoket y funcionalidad del  chat -->
 
