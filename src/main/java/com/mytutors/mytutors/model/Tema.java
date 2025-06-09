@@ -23,7 +23,7 @@ public class Tema {
 
     @ManyToOne
     @JoinColumn(name = "id_creador", insertable = false, updatable = false)
-    private Usuario creador;
+    private Usuario creador; //tutorado
 
     @Column(name = "id_creador")
     private Long idCreador;

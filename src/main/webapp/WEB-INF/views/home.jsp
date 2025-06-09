@@ -10,6 +10,8 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page session="true" %>
 <%@ page import="com.mytutors.mytutors.model.Usuario" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+
 <c:remove var="mensajes" />
 
 
@@ -40,6 +42,15 @@
 </head>
 <body>
 
+<c:if test="${not empty mensajeFlash}">
+    <div id="mensajeFlash"
+         class="${fn:contains(mensajeFlash, '❌') ? 'error' : ''}">
+            ${mensajeFlash}
+    </div>
+</c:if>
+
+
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
@@ -69,7 +80,7 @@
         </div>
         <nav class="sidebar-nav">
             <a href="${pageContext.request.contextPath}/perfil">👤 Mi perfil</a>
-            <a href="${pageContext.request.contextPath}/aprendizaje">🏆 Mi aprendizaje</a>
+            <a href="${pageContext.request.contextPath}/temas/aprendizaje">🏆 Mi aprendizaje</a>
 <%--            <a href="${pageContext.request.contextPath}/grupos">👥 Mis grupos</a>--%>
             <a href="${pageContext.request.contextPath}/temas/nuevo">➕ Crear tutoría</a>
             <a href="javascript:void(0);" onclick="toggleNotificaciones()">🔔 Notificaciones</a>
@@ -169,15 +180,31 @@
 
             <a href="${pageContext.request.contextPath}/temas/ver?idTema=${tema.id}" class="btn-ver">Ver tema</a>
 
-            <c:if test="${empty tema.tutor
-             and tema.creador.id ne usuario.id
-             and ((tema.rol == 'tutor' and (usuario.rolEnApp == 'tutorado' or usuario.rolEnApp == 'ambos'))
-                  or (tema.rol == 'tutorado' and (usuario.rolEnApp == 'tutor' or usuario.rolEnApp == 'ambos')))}">
-                <form action="${pageContext.request.contextPath}/solicitudes/enviar" method="post">
-                    <input type="hidden" name="idTema" value="${tema.id}" />
-                    <button type="submit" class="btn-solicitar">Solicitar tutoría</button>
-                </form>
-            </c:if>
+            <c:choose>
+                <c:when test="${tema.rol == 'tutor'
+                   and (usuario.rolEnApp == 'tutorado' or usuario.rolEnApp == 'ambos')
+                   and empty tema.creador
+                   and usuario.id != tema.idTutor}">
+                    <form action="${pageContext.request.contextPath}/solicitudes/enviar" method="post">
+                        <input type="hidden" name="idTema" value="${tema.id}" />
+                        <button type="submit" class="btn-solicitar">Solicitar tutoría</button>
+                    </form>
+                </c:when>
+
+                <c:when test="${tema.rol == 'tutorado'
+                   and (usuario.rolEnApp == 'tutor' or usuario.rolEnApp == 'ambos')
+                   and empty tema.tutor
+                   and usuario.id != tema.idCreador}">
+                    <form action="${pageContext.request.contextPath}/solicitudes/enviar" method="post">
+                        <input type="hidden" name="idTema" value="${tema.id}" />
+                        <button type="submit" class="btn-solicitar">Solicitar tutoría</button>
+                    </form>
+                </c:when>
+
+                <c:otherwise>
+                    <p style="color:gray; font-size: 0.9rem;">Este tema no está disponible para solicitud.</p>
+                </c:otherwise>
+            </c:choose>
 
 
         </div>
@@ -573,8 +600,6 @@
 <!-- Contenedor de ventanas flotantes tipo Messenger -->
 <div id="ventanas-messenger-container" style="position: fixed; bottom: 0; right: 0; display: flex; flex-direction: row-reverse; gap: 20px; z-index: 2000;"></div>
 
-
-<!-- notificaciones-->
 <!-- notificaciones-->
 <div id="panelNotificaciones" style="display: none;">
     <h3>Notificaciones</h3>
@@ -586,9 +611,11 @@
         <c:otherwise>
             <c:forEach var="noti" items="${notificaciones}">
                 <div class="notificacion">
+                    <p><strong>ID:</strong> ${noti.id}</p>
                     <p><strong>Solicitud recibida</strong> para el tema: ${noti.nombreTema}</p>
                     <p>Solicitante: ${noti.nombreSolicitante}</p>
                     <p>Fecha: ${noti.fechaFormateada}</p>
+
                     <form action="${pageContext.request.contextPath}/api/notificaciones/aceptar/${noti.id}" method="post" style="display:inline;">
                         <button type="submit">✅ Aceptar</button>
                     </form>
@@ -596,6 +623,7 @@
                     <form action="${pageContext.request.contextPath}/api/notificaciones/rechazar/${noti.id}" method="post" style="display:inline;">
                         <button type="submit">❌ Rechazar</button>
                     </form>
+
                     <hr/>
                 </div>
             </c:forEach>
@@ -603,12 +631,73 @@
     </c:choose>
 </div>
 
+
 <script>
     function toggleNotificaciones() {
         const panel = document.getElementById("panelNotificaciones");
         panel.style.display = (panel.style.display === "none") ? "block" : "none";
 
     }
+    function aceptarSolicitud(id) {
+        if (!id) {
+            alert("❌ ID inválido para aceptar");
+            return;
+        }
+
+        console.log("Enviando aceptación para ID:", id);
+        fetch(`/api/notificaciones/aceptar/${id}`, {
+            method: 'POST'
+        })
+            .then(res => {
+                if (res.ok) {
+                    alert("✅ Solicitud aceptada");
+                    location.reload();
+                } else {
+                    alert("❌ Error al aceptar la solicitud");
+                }
+            })
+            .catch(err => {
+                console.error("Error en aceptarSolicitud:", err);
+            });
+    }
+
+    function rechazarSolicitud(id) {
+        if (!id || isNaN(id)) {
+            console.error("ID inválido para rechazo:", id);
+            alert("❌ ID inválido para rechazo");
+            return;
+        }
+
+        console.log("Enviando rechazo para ID:", id);
+        fetch(`/api/notificaciones/rechazar/${id}`, {
+            method: 'POST'
+        })
+            .then(res => {
+                if (res.ok) {
+                    alert("❌ Solicitud rechazada");
+                    location.reload();
+                } else {
+                    alert("❌ Error al rechazar la solicitud");
+                }
+            })
+            .catch(err => {
+                console.error("Error en rechazarSolicitud:", err);
+            });
+    }
 </script>
+
+<script>
+    window.addEventListener("DOMContentLoaded", function () {
+        const mensaje = document.getElementById("mensajeFlash");
+        if (mensaje) {
+            setTimeout(() => {
+                mensaje.style.opacity = "0";
+                setTimeout(() => mensaje.remove(), 1000); // elimina del DOM tras desaparecer
+            }, 3000); // espera 3 segundos antes de desaparecer
+        }
+    });
+</script>
+
+
 </body>
 </html>

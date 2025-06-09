@@ -47,12 +47,12 @@ public class SolicitudTutoriaService {
 
     }
 
-    public List<SolicitudNotificacionDTO> obtenerSolicitudesDTO(Long idCreador) {
+    public List<SolicitudNotificacionDTO> obtenerSolicitudesDTO(Long idUsuario) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        if(idCreador == null){
+        if(idUsuario == null){
             return Collections.emptyList();
         }
-        List<SolicitudTutoria> solicitudes = solicitudRepo.findByTema_Creador_IdAndRespondidaFalse(idCreador);
+        List<SolicitudTutoria> solicitudes = solicitudRepo.findByTema_Creador_IdOrTema_Tutor_IdAndRespondidaFalse(idUsuario, idUsuario);
 
         return solicitudes.stream().map(s -> {
             SolicitudNotificacionDTO dto = new SolicitudNotificacionDTO();
@@ -65,24 +65,50 @@ public class SolicitudTutoriaService {
     }
 
 
-    public void aceptarSolicitud(Long idSolicitud){
+    public void aceptarSolicitud(Long idSolicitud) {
         SolicitudTutoria solicitud = solicitudRepo.findById(idSolicitud).orElseThrow();
-        Tema tema = solicitud.getTema();
-
-        tema.setTutor(solicitud.getSolicitante());
-        temaRepo.save(tema);
-
         solicitud.setAceptada(true);
         solicitud.setRespondida(true);
-        solicitudRepo.save(solicitud);
 
+        Tema tema = solicitud.getTema();
+        Usuario solicitante = solicitud.getSolicitante();
+
+        if ("tutor".equalsIgnoreCase(tema.getRol())) {
+            // El tutor ya creó el tema, asignar tutorado
+            if (tema.getIdCreador() == null) {
+                tema.setIdCreador(solicitante.getId());
+                tema.setCreador(solicitante);
+            }
+        } else if ("tutorado".equalsIgnoreCase(tema.getRol())) {
+            // El tutorado ya creó el tema, asignar tutor
+            if (tema.getIdTutor() == null) {
+                tema.setIdTutor(solicitante.getId());
+                tema.setTutor(solicitante);
+            }
+        }
+
+        temaRepo.save(tema);
+        solicitudRepo.save(solicitud);
     }
+
+
 
     public void rechazarSolicitud(Long idSolicitud){
-        SolicitudTutoria solicitud = solicitudRepo.findById(idSolicitud).orElseThrow();
-        solicitud.setAceptada(false);
-        solicitud.setRespondida(false);
-        solicitudRepo.save(solicitud);
+        System.out.println("➡️ Intentando rechazar solicitud con id: " + idSolicitud);
+        try {
+            SolicitudTutoria solicitud = solicitudRepo.findById(idSolicitud)
+                    .orElseThrow(() -> new RuntimeException("❌ Solicitud no encontrada con id " + idSolicitud));
+
+            solicitud.setAceptada(false);
+            solicitud.setRespondida(true);
+            solicitudRepo.save(solicitud);
+            System.out.println("✔️ Solicitud rechazada exitosamente.");
+        } catch (Exception e) {
+            System.err.println("❌ Error al rechazar solicitud: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
+
 
 }

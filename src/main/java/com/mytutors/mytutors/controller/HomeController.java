@@ -5,6 +5,7 @@ import com.mytutors.mytutors.model.Usuario;
 import com.mytutors.mytutors.repository.CarreraRepository;
 import com.mytutors.mytutors.repository.FacultadRepository;
 import com.mytutors.mytutors.repository.MateriaRepository;
+import com.mytutors.mytutors.repository.TemaRepository;
 import com.mytutors.mytutors.service.SolicitudTutoriaService;
 import com.mytutors.mytutors.service.UsuarioService;
 import jakarta.servlet.http.HttpSession;
@@ -33,6 +34,8 @@ public class HomeController {
     private CarreraRepository carreraRepository;
     @Autowired
     private SolicitudTutoriaService solicitudTutoriaService;
+    @Autowired
+    private TemaRepository temaRepository;
 
     public HomeController(UsuarioService usuarioService, TemaService temaService) {
         this.usuarioService = usuarioService;
@@ -54,6 +57,11 @@ public class HomeController {
 
         model.addAttribute("carreras", carreraRepository.findAll());
         model.addAttribute("facultades", facultadRepository.findAll());
+
+        //List<Tema> temasDisponibles= temaRepository.findByTutorIsNullOrCreadorIsNull();
+        List<Tema> temasDisponibles = temaRepository.findByIdTutorIsNullOrIdCreadorIsNull();
+
+        model.addAttribute("temas", temasDisponibles);
 
         List<SolicitudNotificacionDTO> notificaciones = solicitudTutoriaService.obtenerSolicitudesDTO(usuario.getId());
         model.addAttribute("notificaciones", notificaciones);

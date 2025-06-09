@@ -6,9 +6,9 @@ import com.mytutors.mytutors.model.Usuario;
 import com.mytutors.mytutors.service.SolicitudTutoriaService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.List;
 
@@ -27,20 +27,30 @@ public class NotificacionController {
         }
         return solicitudService.obtenerSolicitudesDTO(usuario.getId());
     }
-
-    //aceptar una solicitud
+    // ✅ Usar estos nuevos:
     @PostMapping("/aceptar/{id}")
-    public String aceptarSolicitud(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        solicitudService.aceptarSolicitud(id);
-        redirectAttributes.addFlashAttribute("mensajeFlash", "✅ Solicitud aceptada.");
-        return "redirect:/home";
+    public RedirectView aceptarSolicitud(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            solicitudService.aceptarSolicitud(id);
+            redirectAttributes.addFlashAttribute("mensajeFlash", "✅ Solicitud aceptada correctamente.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("mensajeFlash", "❌ Error al aceptar solicitud.");
+        }
+        return new RedirectView("/home");
     }
 
     @PostMapping("/rechazar/{id}")
-    public String rechazarSolicitud(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        solicitudService.rechazarSolicitud(id);
-        redirectAttributes.addFlashAttribute("mensajeFlash", "❌ Solicitud rechazada.");
-        return "redirect:/home";
+    public RedirectView rechazarSolicitud(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            solicitudService.rechazarSolicitud(id);
+            redirectAttributes.addFlashAttribute("mensajeFlash", "❌ Solicitud rechazada correctamente.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("mensajeFlash", "❌ Error al rechazar solicitud.");
+        }
+        return new RedirectView("/home");
     }
+
 
 }

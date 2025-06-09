@@ -1,5 +1,6 @@
 package com.mytutors.mytutors.controller;
 
+import com.mytutors.mytutors.dto.TemaVistaDTO;
 import com.mytutors.mytutors.model.Usuario;
 import com.mytutors.mytutors.repository.MateriaRepository;
 import jakarta.servlet.http.HttpSession;
@@ -196,5 +197,18 @@ public class TemaController {
 
         return "nuevoTema";
 
+    }
+
+    @GetMapping("/aprendizaje")
+    public String verAprendizajes(Model model, HttpSession session) {
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if(usuario==null) {
+            return "redirect:/login";
+        }
+        List<Tema> temasUsuario=temaRepository.findByTutorOrCreador(usuario,usuario);
+        List<TemaVistaDTO> aprendizajes= temaService.obtenerTemasVistas(temasUsuario);
+
+        model.addAttribute("aprendizajes", aprendizajes);
+        return "aprendizaje";
     }
 }

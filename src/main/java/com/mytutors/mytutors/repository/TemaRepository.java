@@ -1,5 +1,6 @@
 package com.mytutors.mytutors.repository;
 
+import com.mytutors.mytutors.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.mytutors.mytutors.model.Tema;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -17,7 +18,12 @@ public interface TemaRepository extends JpaRepository<Tema, Long> {
     List<Tema> findByRol(String rol);
     List<Tema> findByNombreContainingIgnoreCaseOrDescripcionContainingIgnoreCase(String nombre, String descripcion);
 
+    List<Tema> findByTutorIsNullOrCreadorIsNull();
+    List<Tema> findByTutorOrCreador(Usuario usuario, Usuario creador);
+    List<Tema> findByIdTutorIsNullOrIdCreadorIsNull();
+
     @EntityGraph(attributePaths = {"creador", "tutor", "materia"})
     @Override
     List<Tema> findAll();
+
 }

@@ -15,6 +15,9 @@ public interface SolicitudTutoriaRepository extends JpaRepository<SolicitudTutor
     //solicitudes o tutorias que yo creé y aun no he respondido
     List<SolicitudTutoria> findByTema_Creador_IdAndRespondidaFalse(Long idCreador);
 
+    List<SolicitudTutoria> findByTema_Creador_IdOrTema_Tutor_IdAndRespondidaFalse(Long idCreador, Long idTutor);
+
+
     //verificar si ya solicité una tutoria
     Optional<SolicitudTutoria> findBySolicitante_IdAndTema_Id(Long idUsuario, Long idTema);
 

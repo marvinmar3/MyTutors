@@ -1,11 +1,15 @@
 package com.mytutors.mytutors.service;
 
+import com.mytutors.mytutors.dto.TemaVistaDTO;
 import com.mytutors.mytutors.model.Usuario;
+import com.mytutors.mytutors.repository.MateriaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import com.mytutors.mytutors.model.Materia;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.mytutors.mytutors.model.Tema;
 import com.mytutors.mytutors.repository.TemaRepository;
@@ -15,6 +19,9 @@ public class TemaService {
 
     @Autowired
     private TemaRepository temaRepository;
+
+    @Autowired
+    private MateriaRepository materiaRepository;
 
     public Optional<Tema> buscarPorId(Long id){
         return temaRepository.findById(id);
@@ -56,16 +63,27 @@ public class TemaService {
     }
 
     public void guardarTema(Tema tema, Usuario usuario, String rol) {
-        if("tutor".equalsIgnoreCase(rol)){
+        Materia materia = materiaRepository.findById(tema.getIdMateria()).orElseThrow();
+        tema.setMateria(materia);
+
+        if ("tutor".equalsIgnoreCase(rol)) {
+            tema.setIdTutor(usuario.getId());
             tema.setTutor(usuario);
-        }else{
+            tema.setIdCreador(null);
+            tema.setCreador(null);
+        } else if ("tutorado".equalsIgnoreCase(rol)) {
+            tema.setIdCreador(usuario.getId());
+            tema.setCreador(usuario);
+            tema.setIdTutor(null);
             tema.setTutor(null);
         }
-        tema.setIdCreador(usuario.getId());
-        tema.setCreador(usuario);
-        tema.setRol(rol);
 
         temaRepository.save(tema);
+    }
+
+
+    public List<TemaVistaDTO> obtenerTemasVistas(List<Tema> temas) {
+        return temas.stream().map(TemaVistaDTO::new).toList();
     }
 
 }
