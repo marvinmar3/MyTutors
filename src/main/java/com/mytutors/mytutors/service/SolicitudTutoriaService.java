@@ -52,7 +52,7 @@ public class SolicitudTutoriaService {
         if(idUsuario == null){
             return Collections.emptyList();
         }
-        List<SolicitudTutoria> solicitudes = solicitudRepo.findByTema_Creador_IdOrTema_Tutor_IdAndRespondidaFalse(idUsuario, idUsuario);
+        List<SolicitudTutoria> solicitudes = solicitudRepo.findPendientesParaUsuarioResponsable(idUsuario);
 
         return solicitudes.stream().map(s -> {
             SolicitudNotificacionDTO dto = new SolicitudNotificacionDTO();

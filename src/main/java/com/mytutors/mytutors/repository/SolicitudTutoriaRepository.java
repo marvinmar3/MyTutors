@@ -21,4 +21,13 @@ public interface SolicitudTutoriaRepository extends JpaRepository<SolicitudTutor
     //verificar si ya solicité una tutoria
     Optional<SolicitudTutoria> findBySolicitante_IdAndTema_Id(Long idUsuario, Long idTema);
 
+    @Query("""
+    SELECT s FROM SolicitudTutoria s 
+    WHERE 
+        (s.tema.creador.id = :idUsuario OR s.tema.tutor.id = :idUsuario)
+        AND s.respondida = false
+""")
+    List<SolicitudTutoria> findPendientesParaUsuarioResponsable(@Param("idUsuario") Long idUsuario);
+
+
 }

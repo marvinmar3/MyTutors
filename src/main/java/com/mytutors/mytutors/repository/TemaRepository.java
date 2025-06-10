@@ -26,4 +26,19 @@ public interface TemaRepository extends JpaRepository<Tema, Long> {
     @Override
     List<Tema> findAll();
 
+    @Query("""
+    SELECT t FROM Tema t
+    LEFT JOIN t.tutor tutor
+    LEFT JOIN t.creador creador
+    WHERE
+        (t.tutor IS NULL OR tutor.activo = true)
+        AND
+        (t.creador IS NULL OR creador.activo = true)
+""")
+
+    List<Tema> findTemasConUsuariosActivos();
+
+
+
+
 }

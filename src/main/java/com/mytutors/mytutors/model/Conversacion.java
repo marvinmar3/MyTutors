@@ -2,6 +2,9 @@ package com.mytutors.mytutors.model;
 
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 //import java.time.LocalDateTime;
 
 @Entity
@@ -15,6 +18,16 @@ public class Conversacion {
     private String nombre;
     private String tipo;
     //private String LocalDateTime fecha_creado;
+
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name = "participantes_conversacion",
+            joinColumns = @JoinColumn(name = "id_conversacion"),
+            inverseJoinColumns = @JoinColumn(name = "id_usuario")
+    )
+    private List<Usuario> participantes = new ArrayList<>();
+
+
 
     @ManyToOne
     @JoinColumn(name = "id_tema")
@@ -50,5 +63,13 @@ public class Conversacion {
 
     public void setTema(Tema tema) {
         this.tema = tema;
+    }
+
+    public List<Usuario> getParticipantes() {
+        return participantes;
+    }
+
+    public void setParticipantes(List<Usuario> participantes) {
+        this.participantes = participantes;
     }
 }

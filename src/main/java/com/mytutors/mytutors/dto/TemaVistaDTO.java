@@ -1,5 +1,6 @@
 package com.mytutors.mytutors.dto;
 
+import com.mytutors.mytutors.model.Conversacion;
 import com.mytutors.mytutors.model.Tema;
 import com.mytutors.mytutors.model.Usuario;
 
@@ -7,6 +8,7 @@ public class TemaVistaDTO {
     private Tema tema;
     private Usuario tutor;
     private Usuario tutorado;
+    private Conversacion conversacion;
 
     public TemaVistaDTO(Tema tema) {
         this.tema = tema;
@@ -29,12 +31,31 @@ public class TemaVistaDTO {
         return tema;
     }
 
+    public void setTema(Tema tema) {
+        this.tema = tema;
+    }
+
     public Usuario getTutor() {
         return tutor;
+    }
+
+    public void setTutor(Usuario tutor) {
+        this.tutor = tutor;
     }
 
     public Usuario getTutorado() {
         return tutorado;
     }
 
+    public void setTutorado(Usuario tutorado) {
+        this.tutorado = tutorado;
+    }
+
+    public Conversacion getConversacion() {
+        return conversacion;
+    }
+
+    public void setConversacion(Conversacion conversacion) {
+        this.conversacion = conversacion;
+    }
 }

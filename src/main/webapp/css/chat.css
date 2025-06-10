@@ -1,0 +1,89 @@
+/* Estilo del botón de chat flotante */
+.btn-chat {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    color: #001b70;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 1000;
+}
+
+.btn-chat:hover {
+    transform: scale(1.1);
+}
+
+/* Contenedor de ventanas flotantes tipo Messenger */
+#ventanas-messenger-container {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 20px;
+    z-index: 2000;
+}
+
+/* Estilo base para cada ventana de chat */
+.ventana-chat {
+    width: 300px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px 10px 0 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Cabecera del chat */
+.chat-header {
+    background-color: #001b70;
+    color: white;
+    padding: 10px;
+    font-weight: bold;
+}
+
+/* Cuerpo donde van los mensajes */
+.chat-body {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    max-height: 300px;
+}
+
+/* Pie del chat (input + botón) */
+.chat-footer {
+    display: flex;
+    padding: 5px;
+    border-top: 1px solid #ccc;
+}
+
+.chat-footer input {
+    flex: 1;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.chat-footer button {
+    background-color: #001b70;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+.btn-ver {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #0d6efd;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}

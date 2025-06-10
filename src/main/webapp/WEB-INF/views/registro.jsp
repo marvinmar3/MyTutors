@@ -29,7 +29,6 @@
 
             <input type="email" id="correo" name="correo" class="form-control" required
                    placeholder="Correo institucional (@estudiantes.uv.mx)"
-                   pattern="^[a-zA-Z0-9._%+-]+@estudiantes\\.uv\\.mx$"
                    title="Debe ser un correo institucional válido (@estudiantes.uv.mx)">
 
             <select id="facultad" name="facultad" required>

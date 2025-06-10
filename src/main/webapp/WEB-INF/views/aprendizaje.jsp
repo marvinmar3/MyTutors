@@ -78,10 +78,16 @@
       <c:if test="${esCompleto and (usuarioSesion.id == tutor.id or usuarioSesion.id == tutorado.id)}">
         <c:choose>
           <c:when test="${usuarioSesion.id == tutorado.id}">
-            <a href="${pageContext.request.contextPath}/chat/tema/${tema.id}" class="btn-chat">Conversar con el tutor</a>
+            <button class="btn-chat"
+                    onclick="abrirChatMessenger(${vista.conversacion.id}, 'Chat con ${tutor.nombre}')">
+              Conversar con el tutor
+            </button>
           </c:when>
           <c:when test="${usuarioSesion.id == tutor.id}">
-            <a href="${pageContext.request.contextPath}/chat/tema/${tema.id}" class="btn-chat">Conversar con el tutorado</a>
+            <button class="btn-chat"
+                    onclick="abrirChatMessenger(${vista.conversacion.id}, 'Chat con ${tutorado.nombre}')">
+              Conversar con el tutorado
+            </button>
           </c:when>
         </c:choose>
       </c:if>

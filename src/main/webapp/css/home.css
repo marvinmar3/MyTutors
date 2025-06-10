@@ -142,34 +142,7 @@ body {
 .hidden {
     display: none;
 }
-#panel-chats {
-    position: fixed;
-    top: 150px;
-    right: 20px;
-    width: 250px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-    z-index: 999;
-    display: none; /* Para que inicie oculto */
-}
 
-#panel-chats ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-#panel-chats ul li {
-    padding: 10px;
-    border-bottom: 1px solid #f2f2f2;
-    cursor: pointer;
-}
-
-#panel-chats ul li:hover {
-    background-color: #e9ecef;
-}
 #filtro-temas-form {
     display: flex;
     flex-wrap: wrap;
@@ -387,6 +360,8 @@ nuevoTema
     flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    padding-left: 10px;
     overflow: hidden;
 }
 

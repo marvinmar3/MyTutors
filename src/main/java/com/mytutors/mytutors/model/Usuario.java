@@ -1,6 +1,10 @@
 package com.mytutors.mytutors.model;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 public class Usuario {
     @Id
@@ -29,6 +33,10 @@ public class Usuario {
 
     @Column(nullable = false)
     private boolean activo= true;
+
+    @ManyToMany(mappedBy = "participantes")
+    private List<Conversacion> conversaciones = new ArrayList<>();
+
 
     //getters y setters
 
@@ -105,5 +113,17 @@ public class Usuario {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public List<Conversacion> getConversaciones() {
+        return conversaciones;
+    }
+
+    public void setConversaciones(List<Conversacion> conversaciones) {
+        this.conversaciones = conversaciones;
+    }
+
+    public boolean isActivo() {
+        return activo;
     }
 }

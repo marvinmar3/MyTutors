@@ -26,6 +26,7 @@
 <head>
     <title>MyTutors</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/home.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/chat.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
         function toggleSidebar() {
@@ -84,7 +85,7 @@
 <%--            <a href="${pageContext.request.contextPath}/grupos">👥 Mis grupos</a>--%>
             <a href="${pageContext.request.contextPath}/temas/nuevo">➕ Crear tutoría</a>
             <a href="javascript:void(0);" onclick="toggleNotificaciones()">🔔 Notificaciones</a>
-            <a href="${pageContext.request.contextPath}/configuracion">⚙️ Configuración</a>
+<%--            <a href="${pageContext.request.contextPath}/configuracion">⚙️ Configuración</a>--%>
             <a href="${pageContext.request.contextPath}/logout" class="logout">⬅ Cerrar sesión</a>
         </nav>
     </div>
@@ -256,146 +257,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 
-<script>
-    let stompClient = null;
-    let idConversacionActual = null;
-
-    function conectarWebSocket(idConversacion) {
-        idConversacionActual = idConversacion;
-
-        const socket = new SockJS('/chat-websocket');
-
-        stompClient = Stomp.over(socket);
-
-        stompClient.connect({}, function (frame) {
-            console.log('✅ Conectado al WebSocket');
-
-            // Suscribirse al canal específico de la conversación
-            stompClient.subscribe('/topic/mensajes/' + idConversacion, function (mensaje) {
-                const msg = JSON.parse(mensaje.body);
-                mostrarMensaje(msg);
-            });
-
-            // Cargar mensajes anteriores vía jQuery
-            $.getJSON("/api/mensajes/"+ idConversacion, function(mensajes) {
-                if (!Array.isArray(mensajes)) {
-                    console.error("❌ Respuesta inválida del servidor:", mensajes);
-                    return;
-                }
-
-                const chat = document.getElementById(`chat-body-${idConversacion}`);
-                chat.innerHTML = ''; // Limpia contenido anterior
-
-                mensajes.forEach(m => {
-                    console.log("✅ mensaje cargado vía API:", m); // este es CLAVE
-                    mostrarMensajeChat(m, idConversacion);
-                });
-
-
-            }).fail(function(jqXHR, textStatus, errorThrown) {
-                console.error("❌ Error al obtener mensajes:", textStatus, errorThrown);
-            });
-        });
-    }
-
-
-
-    function mostrarMensajeChat(mensaje, idConversacion) {
-        const contenedor = document.getElementById(`chat-body-${idConversacion}`);
-        console.log("Contendor chat encontrado: ", contenedor);
-        if (!contenedor) {
-            console.warn(`❌ No se encontró chat-body-${idConversacion}`);
-            return;
-        }
-        const div = document.createElement("div");
-        div.classList.add("mensaje");
-
-        const horaFormateada = formatearHora(mensaje.fechaEnvio || new Date().toISOString());
-
-        if (parseInt(mensaje.idEmisor) === parseInt(usuarioIdGlobal)) {
-            div.classList.add("mensaje-propio");
-            div.innerHTML = `
-            <div class="contenido-mensaje">${mensaje.contenido}</div>
-            <div class="detalle-mensaje"><small>${horaFormateada}</small></div>
-        `;
-        } else {
-            div.classList.add("mensaje-ajeno");
-            div.innerHTML = `
-            <div class="contenido-mensaje">${mensaje.contenido}</div>
-            <div class="detalle-mensaje"><small><strong>${mensaje.nombreEmisor}</strong> · ${horaFormateada}</small></div>
-        `;
-        }
-        console.log("📦 Mostrando mensaje:", mensaje);
-
-        contenedor.appendChild(div);
-        contenedor.scrollTop=contenedor.scrollHeight;
-
-    }
-
-    function mostrarMensaje(msg){
-        console.log("📩 mensaje recibido por websocket: ",msg);
-        console.log("contenido: ", msg.contenido);
-        if(!msg || !msg.idConversacion || !msg.contenido) {
-            console.log.warm("‼️Mensaje invalido recibido", msg);
-            return;
-        }
-        if(!msg.contenido || msg.contenido.trim()===""){
-            console.warn("El mensaje no tiene contenido", msg);
-        }
-        console.log("📦Mensaje recibido: ", msg);
-
-        mostrarMensajeChat(msg, msg.idConversacion);
-    }
-
-
-    function enviarMensajeChat(idConversacion) {
-        const input = document.getElementById(`input-${idConversacion}`);
-        const contenido = input.value.trim();
-        if (!contenido) return;
-
-        const mensaje = {
-            idConversacion: idConversacion,
-            idEmisor: usuarioIdGlobal,
-            contenido: contenido,
-            fechaEnvio: new Date().toISOString()
-        };
-
-        $.ajax({
-            url: "/api/mensajes",
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify(mensaje),
-            success: function () {
-                input.value = "";
-                actualizarMensajes(idConversacion);
-            },
-            error: function (xhr, status, error) {
-                console.error("❌ Error al enviar mensaje:", error);
-            }
-        });
-    }
-
-
-    function cerrarChatMessenger(idConversacion) {
-        const ventana = document.getElementById(`chat-messenger-${idConversacion}`);
-        if (ventana) {
-            ventana.remove();
-        }
-
-        //detener el setinterval asociado
-        const index = ventanasAbiertas.findIndex(v => v.id === idConversacion);
-        if (index !== -1) {
-            clearInterval(ventanasAbiertas[index].intervalId);
-            ventanasAbiertas.splice(index, 1);
-        }
-
-    }
-
-
-    function enviarSiEnter(e) {
-        if (e.key === "Enter") enviarMensajeChat();
-    }
-</script>
 
 <!-- filtros -->
 <script>
@@ -481,6 +342,10 @@
     function cargarConversaciones() {
         $.getJSON("/mis-conversaciones", function (data) {
             const contenedor = document.getElementById("listaConversaciones");
+            if (!contenedor){
+                console.warn("Contenedor de conversaciones no encontrado");
+                return;
+            }
             contenedor.innerHTML = "";
 
             if (data.length === 0) {
@@ -491,8 +356,10 @@
             data.forEach(conv => {
                 console.log("👉 Conversación cargada:", conv);
 
-                const nombreValido = conv.nombre && typeof conv.nombre === 'string' && conv.nombre !== "false";
-                const nombreMostrado = nombreValido ? conv.nombre : "Desconocido";
+                const nombreBruto = conv.nombre ?? "";
+                const nombreMostrado = nombreBruto.trim() && nombreBruto !== "false"
+                    ? nombreBruto.trim()
+                    : "Usuario desconocido";
 
                 const item = document.createElement("div");
                 item.className = "chat-item";
@@ -553,8 +420,6 @@
         });
     }
 
-    const ventanasAbiertas = [];
-
     function abrirChatMessenger(idConversacion, nombre) {
         if(!idConversacion || isNaN(idConversacion)){
             console.error("ID de conversacion inválido: ", idConversacion);
@@ -590,50 +455,24 @@
 
         conectarWebSocket(idConversacion);
 
-        //cargar los mensajes inicialmenente
-        actualizarMensajes(idConversacion);
-
-        //establecer polling con setInterval
-        const intervalId = setInterval(() => {
-            console.log("⏱️ Ejecutando actualizarMensajes para ID: ", idConversacion);
-            if (!idConversacion || isNaN(idConversacion)) {
-                console.warn("⚠️ ID de conversacion inválido en polling:", idConversacion);
-                return;
-            }
-            actualizarMensajes(idConversacion);
-        }, 2000);
-        ventanasAbiertas.push({ id: idConversacion, dom: div, intervalId });
-
+        ventanasAbiertas.push({ id: idConversacion, dom: div });
 
     }
     const ultimoMensajePorConversacion={};
 
-    function actualizarMensajes(idConversacion){
-        if(!idConversacion || isNaN(idConversacion)){
-            console.warn("❌ID de conversacion inválido en polling: ",idConversacion);
-            return;
-        }
-        console.log("🔁 Ejecutando actualizarMensajes para ID:", idConversacion);
-
-        $.getJSON("/api/mensajes/" + idConversacion, function (mensajes) {
-            console.log("📨 Respuesta del servidor:", mensajes);
-            console.log("ID de la conversacion: ", idConversacion);
-            const contenedor = document.getElementById(`chat-body-${idConversacion}`);
-            if(!contenedor) return;
-
-            const ultimoIdMostrado= ultimoMensajePorConversacion[idConversacion] || -1;
-
-            contenedor.innerHTML = '';
-
-            mensajes.forEach(m => {
-                mostrarMensajeChat(m, idConversacion);
-                ultimoMensajePorConversacion[idConversacion]= m.id;
-            });
-        }).fail(function () {
-            console.error("❌ Error al cargar mensajes por polling.");
+    function abrirChatDesdeTema(idTema, nombreConversacion) {
+        $.get("/api/conversacion/por-tema/" + idTema, function(resp) {
+            if (!resp || !resp.id) {
+                alert("No se pudo obtener la conversación.");
+                return;
+            }
+            abrirChatMessenger(resp.id, nombreConversacion);
+        }).fail(function(err) {
+            console.error("❌ Error al abrir conversación:", err);
+            alert("No tienes acceso o la tutoría aún no está completa.");
         });
-
     }
+
 
 </script>
 
@@ -738,6 +577,7 @@
     });
 </script>
 
+<script src="${pageContext.request.contextPath}/js/chat.js"></script>
 
 </body>
 </html>

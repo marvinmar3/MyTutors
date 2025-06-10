@@ -51,17 +51,18 @@ public class HomeController {
         }
 
         model.addAttribute("usuario", usuario);
-        model.addAttribute("materias", materiaRepository.findAll());
-        model.addAttribute("nombreUsuario", usuario!=null?usuario.getNombre():"Invitado");
-        model.addAttribute("temas", temaService.obtenerTemas());
+        model.addAttribute("nombreUsuario", usuario.getNombre());
 
+        //catalogos
+        model.addAttribute("materias", materiaRepository.findAll());
         model.addAttribute("carreras", carreraRepository.findAll());
         model.addAttribute("facultades", facultadRepository.findAll());
+//        model.addAttribute("nombreUsuario", usuario!=null?usuario.getNombre():"Invitado");
 
-        //List<Tema> temasDisponibles= temaRepository.findByTutorIsNullOrCreadorIsNull();
-        List<Tema> temasDisponibles = temaRepository.findByIdTutorIsNullOrIdCreadorIsNull();
-
+        //cargar temas disponibles con usuarios validos
+        List<Tema> temasDisponibles = temaRepository.findTemasConUsuariosActivos();
         model.addAttribute("temas", temasDisponibles);
+
 
         List<SolicitudNotificacionDTO> notificaciones = solicitudTutoriaService.obtenerSolicitudesDTO(usuario.getId());
         model.addAttribute("notificaciones", notificaciones);

@@ -1,6 +1,7 @@
 package com.mytutors.mytutors.service;
 
 import com.mytutors.mytutors.dto.TemaVistaDTO;
+import com.mytutors.mytutors.model.Conversacion;
 import com.mytutors.mytutors.model.Usuario;
 import com.mytutors.mytutors.repository.MateriaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,10 @@ public class TemaService {
 
     @Autowired
     private MateriaRepository materiaRepository;
+
+    @Autowired
+    private ConversacionService conversacionService;
+
 
     public Optional<Tema> buscarPorId(Long id){
         return temaRepository.findById(id);
@@ -83,7 +88,17 @@ public class TemaService {
 
 
     public List<TemaVistaDTO> obtenerTemasVistas(List<Tema> temas) {
-        return temas.stream().map(TemaVistaDTO::new).toList();
+        return temas.stream().map(tema -> {
+            TemaVistaDTO dto = new TemaVistaDTO(tema);
+
+            if (tema.getTutor() != null && tema.getCreador() != null) {
+                Conversacion conversacion = conversacionService.obtenerOCrearConversacionIndividual(tema);
+                dto.setConversacion(conversacion);
+            }
+
+            return dto;
+        }).toList();
+
     }
 
 }

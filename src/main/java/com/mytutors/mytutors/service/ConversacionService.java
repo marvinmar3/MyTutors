@@ -8,6 +8,7 @@ import com.mytutors.mytutors.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.mytutors.mytutors.model.Conversacion;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -33,108 +34,45 @@ public class ConversacionService {
 
     public List<ConversacionVistaDTO> obtenerConversaciones(Long usuarioId) {
         List<Conversacion> conversaciones = conversacionRepository.findByUsuarioId(usuarioId);
-        Map<Long, ConversacionVistaDTO> mapa = new HashMap<>();
+        Map<Long, ConversacionVistaDTO> mapa = new LinkedHashMap<>();
 
-        for(Conversacion conv: conversaciones) {
-            List<Usuario> otros = usuarioRepository.obtenerOtroParticipante(conv.getId(),usuarioId);
-            Usuario otro = (otros != null && !otros.isEmpty()) ? otros.get(0) : null;
+        for (Conversacion conv : conversaciones) {
+            // Obtener al otro participante
+            List<Usuario> otros = usuarioRepository.obtenerOtroParticipante(conv.getId(), usuarioId);
+            Usuario otro = (!otros.isEmpty()) ? otros.get(0) : null;
 
-            if(otro ==null || mapa.containsKey(otro.getId())) continue;
+            if (otro == null || mapa.containsKey(conv.getId())){
+                System.out.println("Participante no encontrado para conversacion " + conv.getId());
+                continue;
+            }
+            System.out.println("Otro participante: "+ otro.getNombre() + otro.getId());
 
             ConversacionVistaDTO dto = new ConversacionVistaDTO();
             dto.setId(conv.getId());
 
-            //nombre
-            String nombre= otro.getNombre();
-            dto.setNombre((nombre == null || nombre.trim().isEmpty() || nombre.equalsIgnoreCase("false")) ? "Usuario desconocido" : nombre);
+            // Establecer nombre y avatar
+            String nombre = otro.getNombre();
+            dto.setNombre((nombre == null || nombre.trim().isEmpty() || nombre.equalsIgnoreCase("false"))
+                    ? "Usuario desconocido"
+                    : nombre);
 
-            //foto
             String ruta = otro.getRutaFoto();
-            dto.setAvatar((ruta==null || ruta.trim().isEmpty() || ruta.equalsIgnoreCase("false"))? "/img/default-user.jpeg": ruta);
+            dto.setAvatar((ruta == null || ruta.trim().isEmpty() || ruta.equalsIgnoreCase("false"))
+                    ? "/img/default-user.jpeg"
+                    : ruta);
 
-            mensajeRepository.findTopByIdConversacionOrderByFechaEnvioDesc(conv.getId())
-                    .ifPresent(mensaje -> {
-                        dto.setUltimoMensaje(mensaje.getContenido());
-                        dto.setFechaUltimoMensaje(mensaje.getFechaEnvio());
-                    });
+            // Obtener último mensaje
+            mensajeRepository.findTopByIdConversacionOrderByFechaEnvioDesc(conv.getId()).ifPresent(mensaje -> {
+                dto.setUltimoMensaje(mensaje.getContenido());
+                dto.setFechaUltimoMensaje(mensaje.getFechaEnvio());
+            });
 
-            mapa.put(otro.getId(), dto);
+            mapa.put(conv.getId(), dto);
         }
-
-
-       /* for (Conversacion conv : conversaciones) {
-            ConversacionVistaDTO dto = new ConversacionVistaDTO();
-            dto.setId(conv.getId());
-
-            // Por defecto
-            dto.setNombre("Sin nombre");
-            dto.setAvatar("/img/default-user.jpeg");
-
-            if ("grupo".equals(conv.getTipo())) {
-                if (conv.getNombre() != null && !conv.getNombre().isBlank()) {
-                    dto.setNombre(conv.getNombre());
-                }
-                dto.setAvatar("/img/default-group.png"); // asegúrate de tener esta imagen
-            } else {
-                List<Usuario> otros= usuarioRepository.obtenerOtroParticipante(conv.getId(), usuarioId);
-                System.out.println("Conversacion ID: " + conv.getId()+ ", Usuario actual:"+ usuarioId);
-                System.out.println("Otros participantes encontrados:"+ (otros!= null ? otros.size(): "null"));
-
-                Usuario otro = (otros!=null && !otros.isEmpty()) ? otros.get(0) : null;
-                if (otro != null) {
-                    System.out.println("- Usuario obtenido: "+ otro);
-                    System.out.println("- Nombre: "+otro.getNombre());
-                    System.out.println("- Ruta foto: "+otro.getRutaFoto());
-
-
-                    String nombre = otro.getNombre();
-                    if (nombre == null || nombre.trim().isEmpty() || nombre.equals("false")) {
-                        nombre = "Usuario desconocido";
-                    }
-                    dto.setNombre(nombre);
-
-                    String ruta = otro.getRutaFoto();
-                    if (ruta == null || ruta.trim().isEmpty() || ruta.equals("false")) {
-                        dto.setAvatar("/img/default-user.jpeg");
-                    } else {
-                        dto.setAvatar(ruta);
-                    }
-
-                } else {
-                    dto.setNombre("Usuario eliminado");
-                    dto.setAvatar("/img/default-user.jpeg");
-                }
-            }
-
-
-            //ultimo msj
-            Mensaje ultimo = mensajeRepository
-                    .findTopByIdConversacionOrderByFechaEnvioDesc(conv.getId())
-                    .orElse(null);
-
-            if(ultimo != null){
-                dto.setUltimoMensaje(ultimo.getContenido());
-                dto.setFechaUltimoMensaje(ultimo.getFechaEnvio());
-            }
-            resultado.add(dto);
-        }*/
 
         return new ArrayList<>(mapa.values());
     }
 
-    public Conversacion obtenerOCrearPorTema(Long idTema) {
-        return conversacionRepository.findByTemaId(idTema).orElseGet(()->{
-            Tema tema = temaRepository.findById(idTema).orElse(null);
-            if(tema==null) return null;
-
-            Conversacion nueva = new Conversacion();
-            nueva.setTema(tema);
-            nueva.setNombre("Char del tema: "+tema.getNombre());
-            nueva.setTipo("grupo");
-
-            return conversacionRepository.save(nueva);
-        });
-    }
 
     private ConversacionVistaDTO crearDTO(Conversacion conv, Long usuarioId) {
         ConversacionVistaDTO dto = new ConversacionVistaDTO();
@@ -177,5 +115,39 @@ public class ConversacionService {
         return dto;
 
     }
+
+    @Transactional
+    public Conversacion obtenerOCrearConversacionIndividual(Tema tema) {
+        if (tema.getTutor() == null || tema.getCreador() == null) {
+            return null;
+        }
+
+        // Buscar si ya existe una conversación para este tema
+        Optional<Conversacion> existente = conversacionRepository.findByTemaId(tema.getId());
+        if (existente.isPresent()) {
+            return existente.get();
+        }
+
+        // Crear nueva conversación
+        Conversacion nueva = new Conversacion();
+        nueva.setTema(tema);
+        nueva.setTipo("individual");
+        nueva.setNombre("Chat entre " + tema.getCreador().getNombre() + " y " + tema.getTutor().getNombre());
+
+        List<Usuario> participantes = new ArrayList<>();
+        participantes.add(tema.getCreador());
+        participantes.add(tema.getTutor());
+        for (Usuario participante : participantes) {
+            if (participante.getConversaciones() == null) {
+                participante.setConversaciones(new ArrayList<>());
+            }
+            participante.getConversaciones().add(nueva);
+        }
+        nueva.setParticipantes(participantes);
+
+
+        return conversacionRepository.save(nueva);
+    }
+
 
 }

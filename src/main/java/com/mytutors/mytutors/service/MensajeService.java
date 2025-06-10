@@ -76,8 +76,12 @@ public class MensajeService {
             dto.setContenido(m.getContenido());
             dto.setFechaEnvio(m.getFechaEnvio());
 
-            Optional<Usuario> usuario = usuarioRepository.findById(m.getIdEmisor());
-            dto.setNombreEmisor(usuario.map(Usuario::getNombre).orElse("Desconocido"));
+            if (m.getIdEmisor() != null) {
+                Optional<Usuario> usuario = usuarioRepository.findById(m.getIdEmisor());
+                dto.setNombreEmisor(usuario.map(Usuario::getNombre).orElse("Desconocido"));
+            } else {
+                dto.setNombreEmisor("Desconocido");
+            }
 
             return dto;
         }).toList();

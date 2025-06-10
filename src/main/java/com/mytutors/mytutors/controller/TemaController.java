@@ -104,6 +104,18 @@ public class TemaController {
             tema.setIdCreador(usuario.getId());
             tema.setRol(rol);
 
+            // Establecer el creador si es tutorado
+            if ("tutorado".equalsIgnoreCase(rol)) {
+                tema.setIdCreador(usuario.getId());
+                tema.setCreador(usuario);
+            }
+
+            // Establecer el tutor si es tutor
+            if ("tutor".equalsIgnoreCase(rol)) {
+                tema.setTutor(usuario); // por consistencia
+            }
+
+
             temaService.guardarTema(tema, usuario, rol);
             redirectAttributes.addFlashAttribute("exito", "La tutoría fue creada exitosamente!");
             return "redirect:/home";

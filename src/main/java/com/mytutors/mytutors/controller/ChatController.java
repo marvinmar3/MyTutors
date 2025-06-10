@@ -2,10 +2,14 @@ package com.mytutors.mytutors.controller;
 
 import com.mytutors.mytutors.dto.ConversacionVistaDTO;
 import com.mytutors.mytutors.model.Conversacion;
+import com.mytutors.mytutors.model.Tema;
 import com.mytutors.mytutors.model.Usuario;
+import com.mytutors.mytutors.repository.TemaRepository;
 import com.mytutors.mytutors.service.ConversacionService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,43 +25,60 @@ import java.util.List;
 public class ChatController {
     @Autowired
     private  ConversacionService conversacionService;
+    @Autowired
+    private TemaRepository temaRepository;
 
     @GetMapping("/mis-conversaciones")
     @ResponseBody
     public List<ConversacionVistaDTO> obtenerConversaciones(HttpSession session) {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
 
-        if (usuario != null) {
-            System.out.println("Usuario en sesion: " + usuario.getNombre() + "(ID: "+ usuario.getId() + ")");
-            List<ConversacionVistaDTO> conversaciones = conversacionService.obtenerConversaciones(usuario.getId());
-
-            if (conversaciones != null && !conversaciones.isEmpty()) {
-                System.out.println("conversaciones encontradas: " + conversaciones.size());
-                conversaciones.forEach(conv -> System.out.println("Conversación: " + conv.getNombre()));
-                return conversaciones;
-            } else {
-                System.out.println("No se encontraron conversaciones");
-            }
-        } else {
+        if (usuario == null) {
             System.out.println("Usuario no encontrado en sesión");
+            return Collections.emptyList();
         }
 
-        return Collections.emptyList();
+        List<ConversacionVistaDTO> conversaciones = conversacionService.obtenerConversaciones(usuario.getId());
+
+        if (conversaciones.isEmpty()) {
+            System.out.println("No se encontraron conversaciones para el usuario " + usuario.getNombre());
+        } else {
+            System.out.println("✅ " + conversaciones.size() + " conversaciones encontradas");
+            conversaciones.forEach(conv -> System.out.println("🗨️ " + conv.getNombre()));
+        }
+
+        return conversaciones;
     }
 
 
-    @GetMapping("/tema/{idTema}")
-    public String chatPorTema(@PathVariable Long idTema, HttpSession session, Model model) {
+    @GetMapping("/api/conversacion/por-tema/{idTema}")
+    @ResponseBody
+    public ResponseEntity<ConversacionVistaDTO> obtenerConversacionPorTema(@PathVariable Long idTema, HttpSession session) {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        Conversacion conversacion = conversacionService.obtenerOCrearPorTema(idTema);
+        Tema tema = temaRepository.findById(idTema).orElse(null);
+        if (tema == null || tema.getCreador() == null || tema.getTutor() == null)
+            return ResponseEntity.notFound().build();
 
-        if (conversacion != null) {
-            model.addAttribute("conversacion", conversacion);
-            model.addAttribute("usuario", usuario);
-            return "chatTema"; // vista JSP del chat
-        }
-        return "redirect:/home";
+        if (!usuario.getId().equals(tema.getCreador().getId()) && !usuario.getId().equals(tema.getTutor().getId()))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
+        Conversacion conversacion = conversacionService.obtenerOCrearConversacionIndividual(tema);
+        if (conversacion == null) return ResponseEntity.internalServerError().build();
+
+        ConversacionVistaDTO dto = new ConversacionVistaDTO();
+        dto.setId(conversacion.getId());
+        dto.setNombre("Chat con " + (
+                usuario.getId().equals(tema.getTutor().getId()) ?
+                        tema.getCreador().getNombre() :
+                        tema.getTutor().getNombre()
+        ));
+
+        return ResponseEntity.ok(dto);
     }
+
+
+
 
 }

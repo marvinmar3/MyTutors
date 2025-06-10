@@ -14,11 +14,11 @@ public interface UsuarioRepository extends JpaRepository <Usuario, Long>{
     List<Usuario> findByRolEnApp(String rolEnApp);
     List<Usuario> findByTipoUsuario(String tipoUsuario);
 
-    @Query("SELECT u FROM Usuario u WHERE u.id IN (" +
-            "SELECT p.idUsuario FROM ParticipanteConversacion p " +
-            "WHERE p.idConversacion = :idConversacion AND p.idUsuario <> :idUsuario)")
-    List<Usuario> obtenerOtroParticipante(@Param("idConversacion") Long idConversacion,
-                                    @Param("idUsuario") Long idUsuario);
+    @Query("SELECT u FROM Conversacion c JOIN c.participantes u WHERE c.id = :idConversacion AND u.id <> :idUsuario")
+    List<Usuario> obtenerOtroParticipante(
+            @Param("idConversacion") Long idConversacion,
+            @Param("idUsuario") Long idUsuario
+    );
 
 
 }
