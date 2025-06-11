@@ -22,7 +22,8 @@
       <input type="text" name="nombre" required class="form-control"/>
 
       <label>Descripción:</label>
-      <textarea name="descripcion" class="form-control" required></textarea>
+      <textarea name="descripcion" class="form-control" required
+      placeholder="Escribe una breve descripción de la tutoria, opcional: requisitos, disponibilidad y costo"></textarea>
 
       <label>Facultad:</label>
       <select name="id_facultad" id="facultad" required>

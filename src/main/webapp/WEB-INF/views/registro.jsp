@@ -50,7 +50,7 @@
                 <option value="">Selecciona tu rol en la app</option>
                 <option value="tutor">Tutor</option>
                 <option value="tutorado">Tutorado</option>
-                <option value="ambos">Ambos</option>
+<%--                <option value="ambos">Ambos</option>--%>
             </select>
 
             <button type="submit">Registrarse</button>

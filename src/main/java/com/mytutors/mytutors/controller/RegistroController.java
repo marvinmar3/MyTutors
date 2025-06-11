@@ -64,7 +64,7 @@ public class RegistroController {
         {
             usuario.setTipoUsuario("estudiante");
         }else if(correo.endsWith("@uv.mx")){
-            usuario.setTipoUsuario("professor");
+            usuario.setTipoUsuario("profesor");
         } else {
             //si no es institucional, regresamos a registro con error
             List<Facultad> facultades = facultadRepo.findAll();

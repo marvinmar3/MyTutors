@@ -37,6 +37,13 @@ public class LoginController {
         Usuario usuario = usuarioService.buscarPorCorreo(correo);
 
         if (usuario != null && passwordEncoder.matches(password, usuario.getPassword())) {
+
+
+            if (!usuario.isActivo()) {
+                model.addAttribute("error", "Tu cuenta está inactiva. Contacta al administrador.");
+                return "login";
+            }
+
             session.setAttribute("usuario", usuario);
             session.setAttribute("nombreUsuario", usuario.getNombre());
 
